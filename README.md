@@ -12,6 +12,7 @@ Team:
 - [ ] Verschiedene Embedding Modelle austesten und vergleichen sinnvoll?
 - [ ] Ist es möglich/sinnvoll den Chatbot auf angefertigtem Dataset mit vorgefertigen Fragen & Richtigen Ja/Nein antworten quantitativ zu evaluieren?
 - [ ] Soll der Bot Quellen angeben können?
+- [ ] Macht es Sinn, separat zu Testen wie gut die Abfrage der Embeddings ist, und wie gut das LLM daraus anschliessend eine Antwort generiert?
 
 ## Ziel
 
