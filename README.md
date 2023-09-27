@@ -40,7 +40,7 @@ Die Art von Fragen, die Data beantworten können soll, lassen sich wie folgt kat
 
 Die Wissensbasis soll auf divsersen Quellen aufbauen.
 
-- Informationen zum Studiengang (Konzept, Wegleitung, Curriculum, Reglement, FHNW Website zum Studiengang etc.)
+- Informationen zum Studiengang (Konzept, Handbuch, Curriculum, Reglement, Plagiate, FHNW Website zum Studiengang etc.)
 - Spaces: Modul-Spaces (Porträt, Lernmaterialien, Aufgaben), jedoch NICHT Beiträge und Kalender (geringer Mehrwert - diese Informationen verändern sich oft und können veraltet sein)
 - (optional) Spaces: Nutzerprofile (Name, Bild, Kontaktinformationen, aktuelles Semester etc.)
 - (optional) PDFs aus Lernmaterialien
@@ -54,7 +54,7 @@ Der Datenschutz muss immer gewährleistet werden. Persönliche Daten sollen nich
 
 CHECK: Beduetet das, persönliche Daten nicht in der Wissensbasis speichern (z.B. Nutzerprofile)? Embeddete Chuncks können wir eher schlecht von solchen Inhalten bereinigen. Und wenn in Antworten z.B. der Name des Dozenten vorkommen soll, dann müssten wir diesen auch in der Wissensbasis speichern.
 
-## Ethishe Leitlinien
+## Ethische Leitlinien
 
 - Bei Problemem des Benutzers moralisch adäquat reagieren (z.B. Stress im Studium, oder Extrembeispiel bei Suizidgedanken) und an entpsrechende Hilfsstellen weitervermitteln
 - Der Chatbot soll eine Persönlichkeit haben (motivierend, humorvoll, empathisch, etc.)
