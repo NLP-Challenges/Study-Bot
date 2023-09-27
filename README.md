@@ -38,21 +38,13 @@ Die Art von Fragen, die Data beantworten können soll, lassen sich wie folgt kat
 
 ## Wissensbasis
 
-Die Wissensbasis soll auf divsersen Quellen aufbauen. Dabei ist es wichtig, statisches und dynamisches Wissen zu Unterscheiden. *Statisches Wissen* ist Wissen, welches sich nicht oder nur selten ändert, und mit Hilfe eines Embedding Modells abgebildet werden und dem Bot als Kontext zur Beantwortung von Nachrichten zur Verfügung gestellt werden kann. *Dynamisches Wissen*  kann sich oft ändern, und soll deshalb wenn der Bedarf erkannt wird, Live von entsprechenden APIs abgefragt werden. 
-
-Die Wissensbasis soll folgende Informationen enthalten:
-
-Statisches Wissen:
+Die Wissensbasis soll auf divsersen Quellen aufbauen.
 
 - Informationen zum Studiengang (Konzept, Wegleitung, Curriculum, Reglement, FHNW Website zum Studiengang etc.)
-- Spaces: Modul-Spaces (Porträt, Lernmaterialien, Aufgaben), jedoch NICHT Beiträge und Kalender (geringer Mehrwert diese Informationen verändern sich oft und können veraltet sein)
+- Spaces: Modul-Spaces (Porträt, Lernmaterialien, Aufgaben), jedoch NICHT Beiträge und Kalender (geringer Mehrwert - diese Informationen verändern sich oft und können veraltet sein)
 - (optional) Spaces: Nutzerprofile (Name, Bild, Kontaktinformationen, aktuelles Semester etc.)
 - (optional) PDFs aus Lernmaterialien
 - (optional) Links zu externen Lernmaterialien
-
-Dynamisches Wissen:
-
-- Stundenplan (Kalender mit Deep Dives und Zeitpunkt Sprechstunde in den Modulen)
 
 ## Privatshpäre
 
