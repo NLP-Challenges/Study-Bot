@@ -8,7 +8,7 @@ Team:
 
 ## Ziel
 
-Ziel dieser Challenge ist die Entwicklung des Chatbots namens "Data". Er soll den Stundenten vom Studiengang Data Science zur Verfügung stehen, und ihnen Fragen rund um den Inhalt der Spaces zu den Modulen beanworten können, wobei er vorgegebenen ethischen Leitlinien folgen soll. Data soll auf die Inhalte der Modul-Spaces zugreifen und Standardanfragen mit Hilfe einer Wissensbasis beantworten können.
+Ziel dieser Challenge ist die Entwicklung des Chatbots namens "Data". Er soll den Stundenten vom Studiengang Data Science zur Verfügung stehen, und ihnen Fragen rund um den Inhalt der Spaces zu den Modulen beanworten können, wobei er eine Persönlichkeit besitzen und vorgegebenen ethischen Leitlinien folgen soll. Data soll auf die Inhalte der Modul-Spaces zugreifen und Standardanfragen mit Hilfe einer Wissensbasis beantworten können.
 
 Der Bot soll auch Probleme des Benutzers erkennen und darauf moralisch adäquat reagieren, zum Beispiel mit aufmunternden Worten oder mit der Weitergabe an eine Ansprechperson. Er soll zudem zur Motivation der Studierenden beitragen.
 
@@ -28,18 +28,23 @@ Folgende Informationen soll der Bot auf Anfrage bereitstellen können:
   - Level
 - Inhalte des Tabs "Porträt" der Module
 - *optional*:
+  - Wissen aus den PDFs in den Lernmaterialien der Module bereitstellen
   - Lernmaterialien vorschlagen
   - Tab "Aufgaben"
 
-In seinem Verhalten soll der Bot folgende ethischen Leitlinien berücksichtigen:
+In seinem Verhalten soll der Bot:
 
-- Motivierend, humorvoll und empathisch sein
+- Die Benutzer duzen (wie im SG Data Science üblich)
+- Ethisch und moralisch korrekt sprechen (gerecht, wertschätzend)
+- Eine motivierende, humorvolle und empathische Persönlichkeit besitzen
+- Einen Dialog mit dem Benutzer führen können und über seine eigene Geschichte Bescheid wissen
 - Auf Probleme des Users adäquat reagieren, wenn er diese erkennt (z.B. Stress im Studium, unzufriedenheit, depressive Phasen)und  Kontaktinformationen von Ansprechpersonen bereitstellen
 
 ### Was der Bot NICHT können soll
 
 - Mehrsprachigkeit explizit unterstützen
 - Auf Inhalte der Lernmaterialien zugreifen können (z.B. PDFs oder externe Links)
+- Wir werden im abgesteckten Rahmen der Challenge keinen direkten Aufwand in die Verhinderung von Prompt Injection u.ä. investieren
 
 ## Wissensbasis
 
@@ -68,8 +73,8 @@ Der Bot steht dem Nutzer in einem simplen Web Chat Interface zur Verfügung. Die
 
 Tech Stack:
 
-- Streamlit (Chat Interface)
-- *optional*: LangChain
+- Chat Interface mit Streamlit (alternativ Gradio von HuggungFace)
+- *voraussichtlich*: LangChain (Für Embedding und Kommunikation mit LLMs)
 
 ### Prompt Classification (auch: npr MC1)
 
@@ -81,6 +86,7 @@ Der Bot unterscheidet an erster Stelle zwischen 3 Arten von Anfragen:
 
 Mögliches Vorgehen:
 
+- In einem Experiment evaluieren, wie viele Trainingsdaten benötigt werden, bis das Modell eine gute Performance in der Klassifikation erreicht
 - Fine-tunig eines BERT Modells zur Klassifikation der User Prompt
 
 Tech Stack:
@@ -146,6 +152,7 @@ Die Zielgruppe des Bots sind die Studierenden des Studiengangs Data Science. Wir
 - Fragt den Bot nach den Leistungsnachweisen in spezifischen Modulen
 - Will wissen, welche Fachexperten für ein Modul zuständig sind
 - Plant das nächste Semester und fragt den Bot nach nach Modulen im Curriculum
+- Wird vom Bot für ihre gute Arbeit gelobt und fühlt sich motiviert
 
 ### Persona 2: Markus, der berufstätige Student
 
