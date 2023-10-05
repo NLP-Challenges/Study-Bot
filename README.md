@@ -31,14 +31,15 @@ Folgende Informationen soll der Bot auf Anfrage bereitstellen können:
   - Lernmaterialien vorschlagen
   - Tab "Aufgaben"
 
-Er soll NICHT:
-
-- Auf Inhalte der Lernmaterialien zugreifen können (z.B. PDFs oder externe Links)
-
 In seinem Verhalten soll der Bot folgende ethischen Leitlinien berücksichtigen:
 
 - Motivierend, humorvoll und empathisch sein
 - Auf Probleme des Users adäquat reagieren, wenn er diese erkennt (z.B. Stress im Studium, unzufriedenheit, depressive Phasen)und  Kontaktinformationen von Ansprechpersonen bereitstellen
+
+### Was der Bot NICHT können soll
+
+- Mehrsprachigkeit explizit unterstützen
+- Auf Inhalte der Lernmaterialien zugreifen können (z.B. PDFs oder externe Links)
 
 ## Wissensbasis
 
@@ -68,7 +69,7 @@ Der Bot steht dem Nutzer in einem simplen Web Chat Interface zur Verfügung. Die
 Tech Stack:
 
 - Streamlit (Chat Interface)
-- LangChain (Kommunikation mit LLM, Embeddings etc.)
+- *optional*: LangChain
 
 ### Prompt Classification (auch: npr MC1)
 
@@ -78,7 +79,7 @@ Der Bot unterscheidet an erster Stelle zwischen 3 Arten von Anfragen:
 - concern
 - not a question or concern
 
-Vorgehen:
+Mögliches Vorgehen:
 
 - Fine-tunig eines BERT Modells zur Klassifikation der User Prompt
 
@@ -87,11 +88,11 @@ Tech Stack:
 - HuggingFace Transformers library
 - LLM: [BERT Base Multilingual](https://huggingface.co/bert-base-multilingual-cased) or similar
 
-### Beantwortung von "concern"
+### LLM für "concern" (auch: npr MC2 und eim MC)
 
 Der Bot geht auf die Anliegen des Users ein, wenn er diese erkennt. Er soll dabei empathisch und motivierend reagieren, und dem User bei Bedarf Kontaktinformationen von Ansprechpersonen bereitstellen.
 
-Vorgehen:
+Mögliches Vorgehen:
 
 - Fine-tuning eines LLAMA2 Modells auf die ethischen Leitlinien für die Beratung und Unterstützung des Users im Bezug auf sein Anliegen.
 
@@ -100,11 +101,11 @@ Tech Stack:
 - HuggingFace Transformers library
 - LLM: [LLAMA2-13B-Chat](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) or similar
 
-### Beantwortung von "question"
+### LLM für "question" (auch: npr MC2)
 
 Der Bot beantwortet die Frage des Users, wenn er sie versteht und die Antwort in der Wissensbasis vorhanden ist. Ansonsten lehnt er die Beantwortung der Frage ab, oder weist den User darauf hin, dass in der Wissensbasis dazu nichts vorhanden ist, und versucht mit internem LLM Wissen weiter zu helfen.
 
-Vorgehen:
+Mögliches Vorgehen:
 
 - Chunking und Embedding des Kontexts in der Wissensbasis.
 - Fine-tuning/Instruction-tuning eines LLAMA2 Modells auf die Beantwortung der Fragen aus gegebenem Kontext.
@@ -176,30 +177,40 @@ Diese Personas können als Grundlage für die Entwicklung des Chatbots "Data" di
 
 ## Privatshpäre
 
-Der Datenschutz muss immer gewährleistet werden. Persönliche Daten sollen nicht an Drittanbieter wie OpenAI weitergegeben werden.
-Das erreichen wir mit folgenden Massnahmen:
-
-- Wir nutzen ein Named Entity Recognition Modell, um persönliche Daten wie Namen, Organisationen, Orte, und E-Mail Adessen zu erkennen und durch Platzhalter zu ersetzen. (z.B. Name mit Variable {name} ersetzen)
-- Das LLM wird über die vorhandenen Variabeln instruiert, und behandelt diese auch für Antworten Platzhalter. (z.B. "Hallo {name}, wie kann ich dir helfen?")
-- Anschliessend können wir die Platzhalter in der generierten Antwort wieder durch die erkannten Entitäten ersetzen, und dem User diese anzeigen.
+Wir nutzen unsere eigenen fine-tuned Modelle, dementsprechend Verlassen keinerlei sensible Daten unser System. Der Chatbot ist nur für Studenten des Studiengangs Data Science zugänglich, und damit sind auch nur Informationen verfügbar, auf die die Studenten ohnehin Zugriff haben.
 
 ## Evaluierung
 
 Ein Chatbot, der falsche Antworten gibt, oder nicht auf die Fragen des Benutzers eingeht, ist nicht hilfreich. Er soll deshalb auf verschiedene Arten evaluiert werden.
 
-### Qualitativ
+### Prompt Classification
 
-- Factuality
+Quantitativ:
 
-### Quantitativ
+- F1-Score
+- Accuracy
 
-Metriken wie:
+Qualitativ:
 
-- Coverage
-- Tiefe
-- Genauigkeit
+- Indiduelle Beispiele testen auf mehreren Modellen für Vergleich
 
-## Was wir NICHT erreichen wollen
+### LLM für "concern"
 
-- Mehrsprachigkeit unterstützen
-- Mehrere LLMs in der Evaluation gegenüberstellen
+Quantitativ:
+
+- Nicht geplant
+
+Qualitativ:
+
+- Individuelle Beispiele, um zu testen, ob der Bot den ethischen Leitlinien folgt
+
+### LLM für "question"
+
+Quantitativ:
+
+- Retrieval (Werden die relevanten Chunks identifiziert)
+- BLEU Score (Wie gut ist die Antwort)
+
+Qualitativ:
+
+- Individuelle Beispiele um die brauchbarkeit der Antworten zu testen
