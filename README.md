@@ -57,13 +57,64 @@ Wir gestalten einen Avator für "Data", der im Chat Interface angezeigt wird.
 
 ## Architektur & Tech Stack
 
-- LLM API (LLAMA2/GPT-3.5/4)
-- LangChain (Kommunikation mit LLM, Embeddings etc.)
-- Streamlit (Chat Interface)
-- Embedding Modelle (OpenAI, BERT von Google)
-- ...
+Der nachfolgenden Skizze kann die geplante Architektur entnommen werden. Die einzelnen Komponenten werden im Folgenden kurz erläutert, wobei Änderungen an der Architektur oder der eingesetzten Technologien im Verlauf der Challenge nicht ausgeschlossen sind.
 
-Task-orientierte Dialog Systeme wie Rasa und Dialogflow CX machen für unseren Use Case wenig Sinn, keine spezifischen Tasks ausgeübt werden müssen (z.B. Änderung in einem System). Es geht viel mehr um die Beantwortung von Fragen. Mit LangChain haben wir dazu eine solide Basis, und bleiben flexibel.
+![Architecture Sketch](architecture_sketch.jpeg)
+
+### Chat Interface
+
+Der Bot steht dem Nutzer in einem simplen Web Chat Interface zur Verfügung. Dieses wird mit Streamlit umgesetzt. Die Logik zur Verarbeitung von Anfragen durch den Bot bauen wir mit Python, wobei wir LangChain verwenden um mit den verschiedenen LLMs zu kommunizieren.
+
+Tech Stack:
+
+- Streamlit (Chat Interface)
+- LangChain (Kommunikation mit LLM, Embeddings etc.)
+
+### Prompt Classification (auch: npr MC1)
+
+Der Bot unterscheidet an erster Stelle zwischen 3 Arten von Anfragen:
+
+- question
+- concern
+- not a question or concern
+
+Vorgehen:
+
+- Fine-tunig eines BERT Modells zur Klassifikation der User Prompt
+
+Tech Stack:
+
+- HuggingFace Transformers library
+- LLM: [BERT Base Multilingual](https://huggingface.co/bert-base-multilingual-cased) or similar
+
+### Beantwortung von "concern"
+
+Der Bot geht auf die Anliegen des Users ein, wenn er diese erkennt. Er soll dabei empathisch und motivierend reagieren, und dem User bei Bedarf Kontaktinformationen von Ansprechpersonen bereitstellen.
+
+Vorgehen:
+
+- Fine-tuning eines LLAMA2 Modells auf die ethischen Leitlinien für die Beratung und Unterstützung des Users im Bezug auf sein Anliegen.
+
+Tech Stack:
+
+- HuggingFace Transformers library
+- LLM: [LLAMA2-13B-Chat](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) or similar
+
+### Beantwortung von "question"
+
+Der Bot beantwortet die Frage des Users, wenn er sie versteht und die Antwort in der Wissensbasis vorhanden ist. Ansonsten lehnt er die Beantwortung der Frage ab, oder weist den User darauf hin, dass in der Wissensbasis dazu nichts vorhanden ist, und versucht mit internem LLM Wissen weiter zu helfen.
+
+Vorgehen:
+
+- Chunking und Embedding des Kontexts in der Wissensbasis.
+- Fine-tuning/Instruction-tuning eines LLAMA2 Modells auf die Beantwortung der Fragen aus gegebenem Kontext.
+
+Tech Stack:
+
+- Embeddings (BERT/Open AI)
+- Vector Storage [PGVector](https://github.com/pgvector/pgvector)
+- HuggingFace Transformers library
+- LLM: [LLAMA2-13B-Chat](https://huggingface.co/meta-llama/Llama-2-13b-chat-hf) or similar
 
 ## Zielgruppe
 
