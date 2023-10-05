@@ -1,4 +1,4 @@
-# Konzept für den Chatbot "Data"
+# Konzept für den Chatbot Data
 
 Team:
 
@@ -8,7 +8,7 @@ Team:
 
 ## Ziel
 
-Ziel dieser Challenge ist die Entwicklung des Chatbots namens "Data". Er soll den Stundenten vom Studiengang Data Science zur Verfügung stehen, und ihnen Fragen rund um den Inhalt der Spaces zu den Modulen beanworten können, wobei er eine Persönlichkeit besitzen und vorgegebenen ethischen Leitlinien folgen soll. Data soll auf die Inhalte der Modul-Spaces zugreifen und Standardanfragen mit Hilfe einer Wissensbasis beantworten können.
+Ziel dieser Challenge ist die Entwicklung des Chatbots namens Data. Er soll den Studenten vom Studiengang Data Science zur Verfügung stehen, und ihnen Fragen rund um den Inhalt der Spaces zu den Modulen beanworten können, wobei er eine Persönlichkeit besitzen und vorgegebenen ethischen Leitlinien folgen soll. Data soll auf die Inhalte der Modul-Spaces zugreifen und Standardanfragen mit Hilfe einer Wissensbasis beantworten können.
 
 Der Bot soll auch Probleme des Benutzers erkennen und darauf moralisch adäquat reagieren, zum Beispiel mit aufmunternden Worten oder mit der Weitergabe an eine Ansprechperson. Er soll zudem zur Motivation der Studierenden beitragen.
 
@@ -32,13 +32,13 @@ Folgende Informationen soll der Bot auf Anfrage bereitstellen können:
   - Lernmaterialien vorschlagen
   - Tab "Aufgaben"
 
-In seinem Verhalten soll der Bot:
+In seinem Verhalten soll der Bot folgende Persönlichkeitsaspekte berücksichtigen:
 
 - Die Benutzer duzen (wie im SG Data Science üblich)
 - Ethisch und moralisch korrekt sprechen (gerecht, wertschätzend)
 - Eine motivierende, humorvolle und empathische Persönlichkeit besitzen
 - Einen Dialog mit dem Benutzer führen können und über seine eigene Geschichte Bescheid wissen
-- Auf Probleme des Users adäquat reagieren, wenn er diese erkennt (z.B. Stress im Studium, unzufriedenheit, depressive Phasen)und  Kontaktinformationen von Ansprechpersonen bereitstellen
+- Auf Probleme des Users adäquat reagieren, wenn er diese erkennt (z.B. Stress im Studium, Unzufriedenheit, depressive Phasen) und Kontaktinformationen von Ansprechpersonen bereitstellen
 
 ### Was der Bot NICHT können soll
 
@@ -56,7 +56,7 @@ Die Inhalte können in Deutsch wie auch in Englisch vorhanden sein, was wir bei 
 
 ## Design
 
-Wir gestalten einen Avator für "Data", der im Chat Interface angezeigt wird.
+Wir gestalten einen Avatar für "Data", der im Chat Interface angezeigt wird.
 
 - Avatar Bild
 - *optional*: Synthetische Stimme
@@ -87,7 +87,7 @@ Der Bot unterscheidet an erster Stelle zwischen 3 Arten von Anfragen:
 Mögliches Vorgehen:
 
 - In einem Experiment evaluieren, wie viele Trainingsdaten benötigt werden, bis das Modell eine gute Performance in der Klassifikation erreicht
-- Fine-tunig eines BERT Modells zur Klassifikation der User Prompt
+- Fine-tunig eines BERT-Modells zur Klassifikation der User Prompt
 
 Tech Stack:
 
@@ -100,7 +100,7 @@ Der Bot geht auf die Anliegen des Users ein, wenn er diese erkennt. Er soll dabe
 
 Mögliches Vorgehen:
 
-- Fine-tuning eines LLAMA2 Modells auf die ethischen Leitlinien für die Beratung und Unterstützung des Users im Bezug auf sein Anliegen.
+- Fine-tuning eines LLAMA2-Modells auf die ethischen Leitlinien für die Beratung und Unterstützung des Users im Bezug auf sein Anliegen.
 
 Tech Stack:
 
@@ -109,12 +109,12 @@ Tech Stack:
 
 ### LLM für "question" (auch: npr MC2)
 
-Der Bot beantwortet die Frage des Users, wenn er sie versteht und die Antwort in der Wissensbasis vorhanden ist. Ansonsten lehnt er die Beantwortung der Frage ab, oder weist den User darauf hin, dass in der Wissensbasis dazu nichts vorhanden ist, und versucht mit internem LLM Wissen weiter zu helfen.
+Der Bot beantwortet die Frage des Users, wenn er sie versteht und die Antwort in der Wissensbasis vorhanden ist. Ansonsten lehnt er die Beantwortung der Frage ab, oder weist den User darauf hin, dass in der Wissensbasis dazu nichts vorhanden ist, und versucht mit internem LLM-Wissen weiter zu helfen.
 
 Mögliches Vorgehen:
 
 - Chunking und Embedding des Kontexts in der Wissensbasis.
-- Fine-tuning/Instruction-tuning eines LLAMA2 Modells auf die Beantwortung der Fragen aus gegebenem Kontext.
+- Fine-tuning/Instruction-tuning eines LLAMA2-Modells auf die Beantwortung der Fragen aus gegebenem Kontext.
 
 Tech Stack:
 
@@ -151,7 +151,7 @@ Die Zielgruppe des Bots sind die Studierenden des Studiengangs Data Science. Wir
 
 - Fragt den Bot nach den Leistungsnachweisen in spezifischen Modulen
 - Will wissen, welche Fachexperten für ein Modul zuständig sind
-- Plant das nächste Semester und fragt den Bot nach nach Modulen im Curriculum
+- Plant das nächste Semester und fragt den Bot nach Modulen im Curriculum
 - Wird vom Bot für ihre gute Arbeit gelobt und fühlt sich motiviert
 
 ### Persona 2: Markus, der berufstätige Student
@@ -184,7 +184,7 @@ Diese Personas können als Grundlage für die Entwicklung des Chatbots "Data" di
 
 ## Privatshpäre
 
-Wir nutzen unsere eigenen fine-tuned Modelle, dementsprechend Verlassen keinerlei sensible Daten unser System. Der Chatbot ist nur für Studenten des Studiengangs Data Science zugänglich, und damit sind auch nur Informationen verfügbar, auf die die Studenten ohnehin Zugriff haben.
+Wir nutzen unsere eigenen fine-tuned Modelle, dementsprechend verlassen keinerlei sensible Daten unser System. Der Chatbot ist nur für Studenten des Studiengangs Data Science zugänglich, und damit sind auch nur Informationen verfügbar, auf die die Studenten ohnehin Zugriff haben.
 
 ## Evaluierung
 
@@ -220,4 +220,4 @@ Quantitativ:
 
 Qualitativ:
 
-- Individuelle Beispiele um die brauchbarkeit der Antworten zu testen
+- Individuelle Beispiele, um die Brauchbarkeit der Antworten zu testen
