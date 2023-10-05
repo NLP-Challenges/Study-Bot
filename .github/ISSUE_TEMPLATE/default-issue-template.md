@@ -10,5 +10,6 @@ assignees: ''
 # Description
 
 # Akzeptanzkriterien
+- [] 
 
 # Additional Information
