@@ -162,3 +162,5 @@ cython_debug/
 # Spaces Data
 eda/data/
 **/.DS_Store
+
+embedder.pkl
