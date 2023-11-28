@@ -4,7 +4,7 @@ import torch
 import gradio as gr
 from peft import PeftModel, PeftConfig
 from transformers import AutoModelForCausalLM
-from transformers import AutoTokenizer, BertTokenizer, BertForSequenceClassification
+from transformers import AutoTokenizer, BertTokenizer, BertForSequenceClassification, BitsAndBytesConfig
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import (
@@ -22,12 +22,25 @@ tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification', t
 model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification", token=os.getenv("HF_ACCESS_TOKEN"))
 model.eval()  # Set the model to evaluation mode
 
+# quantization config
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16
+)
+    
 # Load fine-tuned LLAMA model and tokenizer
 config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
-llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
-llama_model = AutoModelForCausalLM.from_pretrained("flozi00/Llama-2-13b-german-assistant-v4")
+llama_model = AutoModelForCausalLM.from_pretrained(
+    config.base_model_name_or_path, 
+    quantization_config=bnb_config, 
+    device_map="auto"
+)
 llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
 llama_model.eval()
+
+llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
 
 # Classification interface
 def classify_text(strategy, user_input, probabilities):
@@ -184,9 +197,8 @@ def llama_chat(message, history, user_name, temperature):
         )
 
         return tokenizer.decode(outputs[:, inputs["input_ids"].shape[1]:][0], skip_special_tokens=True)
-
-    response = predict(llama_model, llama_tokenizer, message, context)
-    return response
+    
+    return predict(llama_model, llama_tokenizer, message, context)
 
 chat_int = gr.ChatInterface(
     chat, 
