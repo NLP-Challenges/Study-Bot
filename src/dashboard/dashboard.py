@@ -2,7 +2,7 @@ import os
 import time
 import torch
 import gradio as gr
-from transformers import BertTokenizer, BertForSequenceClassification
+from transformers import AutoTokenizer, BertTokenizer, BertForSequenceClassification
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import (
@@ -17,10 +17,20 @@ from tools import search_documents  # Assuming your refactored script is named '
 load_dotenv()
 chat = ChatOpenAI(temperature=0)
 
-# Load fine-tuned model and tokenizer
+# Load fine-tuned classification model and tokenizer
 tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification')
 model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification")
 model.eval()  # Set the model to evaluation mode
+
+# Load fine-tuned LLAMA model and tokenizer
+from peft import PeftModel, PeftConfig
+from transformers import AutoModelForCausalLM
+
+config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
+llama_model = AutoModelForCausalLM.from_pretrained("flozi00/Llama-2-13b-german-assistant-v4")
+llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path")
+llama_model.eval()
+llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path")
 
 # Classification interface
 def classify_text(strategy, user_input, probabilities):
@@ -96,11 +106,22 @@ documentquery_int = gr.Interface(
 )
 
 # Gradio Chat Interface
-def gpt_chat(message, history, user_name):
+def retrieval(message):
     docs = search_documents("assets/chroma", "assets/embedder.pkl", message, "similarity")
     context = ""
     for doc in docs:
         context += f"{doc.metadata}: {doc.page_content}\n"
+    return context
+
+def chat(message, history, user_name, model_type):
+    if model_type == "GPT-3.5":
+        return gpt_chat(message, history, user_name)
+    elif model_type == "LLAMA-2 7B":
+        return llama_chat(message, history, user_name)
+
+def gpt_chat(message, history, user_name):
+    # Get context from retrieval system
+    context = retrieval(message)
 
     # Define a prompt template or use the incoming message directly
     template = (
@@ -126,15 +147,37 @@ def gpt_chat(message, history, user_name):
     messages = chat_prompt.format_prompt(
         user_name=user_name, context=context, message=message
     ).to_messages()
-    print(messages)
     response = chat(messages)
-    print(response)
 
     return response.content
 
+def llama_chat(message, history, user_name):    
+    # Get context from retrieval system
+    context = retrieval(message)
+
+    def predict(model, tokenizer, question, context):        
+        prompt = f"[INST] Nachfolgend bekommst du eine Frage gestellt mit dem best passenden Kontext. Versuche Frage mithilfe des Kontextes zu beantworten. [/INST]\n\n [FRAGE] {question} [/FRAGE]\n\n [KONTEXT] {context} [/KONTEXT]\n\n ANTWORT:\n"
+
+        inputs = tokenizer(prompt, return_tensors="pt")
+        outputs = model.generate(
+            input_ids=inputs["input_ids"].to(model.device),
+            max_new_tokens=500,
+            temperature=0.3,
+            do_sample=True,
+            
+            # Contrastive search: https://huggingface.co/blog/introducing-csearch
+            penalty_alpha=0.6, 
+            top_k=6
+        )
+
+        return tokenizer.decode(outputs[:, inputs["input_ids"].shape[1]:][0], skip_special_tokens=True)
+
+    response = predict(llama_model, llama_tokenizer, message, context)
+    return response
+
 chat_int = gr.ChatInterface(
     gpt_chat, 
-    additional_inputs=[gr.Textbox(label="Name")],
+    additional_inputs=[gr.Textbox(label="Name"), gr.Dropdown(label="Model", choices=["GPT-3.5", "LLAMA-2 7B"], value="GPT-3.5")],
     examples=[["Was lerne ich im Modul Grundlagen der linearen Algebra?"]]
 ).queue()
 
