@@ -4,3 +4,10 @@ gradio==4.4.1
 langchain==0.0.337
 pandas==2.1.3
 python-dotenv==1.0.0
+torch==2.1.1+cu121
+torchaudio==2.1.1+cu121
+transformers==4.35.2
+openai==1.3.5
+peft==0.6.2
+sentence_transformers==2.2.2
+chromadb==0.4.18

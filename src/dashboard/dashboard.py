@@ -1,7 +1,8 @@
 import os
-import time
 import torch
 import gradio as gr
+from peft import PeftModel, PeftConfig
+from transformers import AutoModelForCausalLM
 from transformers import AutoTokenizer, BertTokenizer, BertForSequenceClassification
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
@@ -18,19 +19,16 @@ load_dotenv()
 chat = ChatOpenAI(temperature=0)
 
 # Load fine-tuned classification model and tokenizer
-tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification')
-model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification")
+tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification', token=os.getenv("HF_ACCESS_TOKEN"))
+model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification", token=os.getenv("HF_ACCESS_TOKEN"))
 model.eval()  # Set the model to evaluation mode
 
 # Load fine-tuned LLAMA model and tokenizer
-from peft import PeftModel, PeftConfig
-from transformers import AutoModelForCausalLM
-
 config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
+llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
 llama_model = AutoModelForCausalLM.from_pretrained("flozi00/Llama-2-13b-german-assistant-v4")
-llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path")
+llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
 llama_model.eval()
-llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path")
 
 # Classification interface
 def classify_text(strategy, user_input, probabilities):
@@ -176,7 +174,7 @@ def llama_chat(message, history, user_name):
     return response
 
 chat_int = gr.ChatInterface(
-    gpt_chat, 
+    chat, 
     additional_inputs=[gr.Textbox(label="Name"), gr.Dropdown(label="Model", choices=["GPT-3.5", "LLAMA-2 7B"], value="GPT-3.5")],
     examples=[["Was lerne ich im Modul Grundlagen der linearen Algebra?"]]
 ).queue()
