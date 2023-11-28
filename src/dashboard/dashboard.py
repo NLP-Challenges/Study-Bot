@@ -1,4 +1,5 @@
 import os
+import time
 import torch
 import gradio as gr
 from peft import PeftModel, PeftConfig
@@ -14,9 +15,7 @@ from langchain.prompts.chat import (
 
 from tools import search_documents  # Assuming your refactored script is named 'your_script.py'
 
-# Setup OpenAI API
 load_dotenv()
-openai_chat = ChatOpenAI(temperature=0)
 
 # Load fine-tuned classification model and tokenizer
 tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification', token=os.getenv("HF_ACCESS_TOKEN"))
@@ -105,19 +104,22 @@ documentquery_int = gr.Interface(
 
 # Gradio Chat Interface
 def retrieval(message):
+    time.sleep(1)
     docs = search_documents("assets/chroma", "assets/embedder.pkl", message, "similarity")
     context = ""
     for doc in docs:
         context += f"{doc.metadata}: {doc.page_content}\n"
     return context
 
-def chat(message, history, user_name, model_type):
+def chat(message, history, user_name, model_type, temperature):
     if model_type == "GPT-3.5":
-        return gpt_chat(message, history, user_name)
+        return gpt_chat(message, history, user_name, temperature)
     elif model_type == "LLAMA-2 7B":
-        return llama_chat(message, history, user_name)
+        return llama_chat(message, history, user_name, temperature)
 
-def gpt_chat(message, history, user_name):
+def gpt_chat(message, history, user_name, temperature):
+    openai_chat = ChatOpenAI(temperature=temperature)
+
     # Get context from retrieval system
     context = retrieval(message)
 
@@ -149,18 +151,31 @@ def gpt_chat(message, history, user_name):
 
     return response.content
 
-def llama_chat(message, history, user_name):    
+def llama_chat(message, history, user_name, temperature):    
     # Get context from retrieval system
     context = retrieval(message)
 
     def predict(model, tokenizer, question, context):        
-        prompt = f"[INST] Nachfolgend bekommst du eine Frage gestellt mit dem best passenden Kontext. Versuche Frage mithilfe des Kontextes zu beantworten. [/INST]\n\n [FRAGE] {question} [/FRAGE]\n\n [KONTEXT] {context} [/KONTEXT]\n\n ANTWORT:\n"
+        prompt = f"""
+        [INST] Du bist Data, der freundliche, motivierende Chatbot des Studiengangs BSc Data Science an der FHNW. 
+        Dir stehen Informationen aus Spaces (Der Lernplattform des Studiengangs) zur Verfügung. 
+        Beantworte die Fragen des Studenten immer NUR auf Basis des gegebenen Kontext. 
+        Wenn die Antwort im Kontext nicht vorhanden ist, teile dem User mit, dass du dazu keine Informationen hast. 
+        Nenne immer die Quelle. [/INST]
+        
+        [FRAGE] {question} [/FRAGE]
+        
+        [KONTEXT] {context} [/KONTEXT]
+         
+        ANTWORT:
+        """
 
         inputs = tokenizer(prompt, return_tensors="pt")
+        
         outputs = model.generate(
             input_ids=inputs["input_ids"].to(model.device),
             max_new_tokens=500,
-            temperature=0.3,
+            temperature=temperature,
             do_sample=True,
             
             # Contrastive search: https://huggingface.co/blog/introducing-csearch
@@ -175,7 +190,11 @@ def llama_chat(message, history, user_name):
 
 chat_int = gr.ChatInterface(
     chat, 
-    additional_inputs=[gr.Textbox(label="Name"), gr.Dropdown(label="Model", choices=["GPT-3.5", "LLAMA-2 7B"], value="GPT-3.5")],
+    additional_inputs=[
+        gr.Textbox(label="Name"), 
+        gr.Dropdown(label="Model Architecture", choices=["LLAMA-2 7B", "GPT-3.5"], value="LLAMA-2 7B"),
+        gr.Slider(minimum=0, maximum=1, value=0.3)
+    ],    
     examples=[["Was lerne ich im Modul Grundlagen der linearen Algebra?"]]
 ).queue()
 
