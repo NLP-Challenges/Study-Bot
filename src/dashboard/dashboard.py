@@ -16,7 +16,7 @@ from tools import search_documents  # Assuming your refactored script is named '
 
 # Setup OpenAI API
 load_dotenv()
-chat = ChatOpenAI(temperature=0)
+openai_chat = ChatOpenAI(temperature=0)
 
 # Load fine-tuned classification model and tokenizer
 tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification', token=os.getenv("HF_ACCESS_TOKEN"))
@@ -145,7 +145,7 @@ def gpt_chat(message, history, user_name):
     messages = chat_prompt.format_prompt(
         user_name=user_name, context=context, message=message
     ).to_messages()
-    response = chat(messages)
+    response = openai_chat(messages)
 
     return response.content
 
