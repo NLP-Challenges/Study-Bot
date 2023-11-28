@@ -33,6 +33,7 @@ def search_documents(vector_database_filename, embedder_filename, query, strateg
 
     # Make a copy of the chroma folder
     temp = copy_folder(vector_database_filename)
+    time.sleep(1)
 
     # Load chroma db
     vectorstore = Chroma(persist_directory=vector_database_filename, embedding_function=embedder)
