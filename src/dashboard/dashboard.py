@@ -4,7 +4,7 @@ import torch
 import gradio as gr
 from peft import PeftModel, PeftConfig
 from transformers import AutoModelForCausalLM
-from transformers import AutoTokenizer, BertTokenizer, BertForSequenceClassification, BitsAndBytesConfig
+from transformers import AutoTokenizer, BertTokenizer, BertForSequenceClassification, BitsAndBytesConfig, LlamaConfig
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import (
@@ -19,7 +19,7 @@ load_dotenv()
 
 # Load fine-tuned classification model and tokenizer
 tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification', token=os.getenv("HF_ACCESS_TOKEN"))
-model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification", token=os.getenv("HF_ACCESS_TOKEN"))
+model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification", token=os.getenv("HF_ACCESS_TOKEN"), device_map="cpu")
 model.eval()  # Set the model to evaluation mode
 
 # quantization config
@@ -31,11 +31,14 @@ bnb_config = BitsAndBytesConfig(
 )
     
 # Load fine-tuned LLAMA model and tokenizer
-config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
+peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path") #this is an old model -> bug in max position embeddings -> use new config
+model_config = LlamaConfig.from_pretrained("meta-llama/Llama-2-13b-hf")
+
 llama_model = AutoModelForCausalLM.from_pretrained(
-    config.base_model_name_or_path, 
+    peft_config.base_model_name_or_path, 
     quantization_config=bnb_config, 
-    device_map="auto"
+    device_map="auto",
+    config=model_config
 )
 llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
 llama_model.eval()
@@ -169,14 +172,22 @@ def llama_chat(message, history, user_name, temperature):
     context = retrieval(message)
 
     def predict(model, tokenizer, question, context):        
-        prompt = f"[INST] Du bist der Chatbot des Studiengang Datascience an der Fachhochschule Nordwestschweiz (FHNW) nahmens 'Data' und stehtst den Studierenden als Assistent für die Beantwortung von Fragen rund um den Studiengang und deren Lernplattform 'Spaces' zur verfügung. Beantworte die nachfolgende Frage mit den Informationen des Kontextes oder hier im INST block. [/INST]\n\n [FRAGE] {question} [/FRAGE]\n\n [KONTEXT] {context} [/KONTEXT]\n\n ANTWORT:\n"
+        prompt = f"[INST] Du bist der Chatbot des Studiengang Datascience an der Fachhochschule Nordwestschweiz (FHNW) namens 'Data' und stehst den Studierenden als Assistent für die Beantwortung von Fragen rund um den Studiengang und deren Lernplattform 'Spaces' zur verfügung. Beantworte die nachfolgende Frage mit den Informationen des Kontextes oder hier im INST block. [/INST]\n\n [FRAGE] {question} [/FRAGE]\n\n [KONTEXT] {context} [/KONTEXT]\n\n ANTWORT:\n"
 
-        inputs = tokenizer(prompt, return_tensors="pt")
-        
+        inputs = tokenizer(
+            prompt, 
+            truncation=True,
+            padding=False,
+            max_length=4096-500,
+            return_tensors="pt"
+        )
+
         outputs = model.generate(
             input_ids=inputs["input_ids"].to(model.device),
-            max_new_tokens=500,
+            attention_mask=inputs["attention_mask"].to(model.device),
+            pad_token_id=tokenizer.pad_token_id,
             temperature=temperature,
+            max_new_tokens=500,
             do_sample=True,
             
             # Contrastive search: https://huggingface.co/blog/introducing-csearch
