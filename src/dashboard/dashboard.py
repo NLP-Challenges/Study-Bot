@@ -169,19 +169,7 @@ def llama_chat(message, history, user_name, temperature):
     context = retrieval(message)
 
     def predict(model, tokenizer, question, context):        
-        prompt = f"""
-        [INST] Du bist Data, der freundliche, motivierende Chatbot des Studiengangs BSc Data Science an der FHNW. 
-        Dir stehen Informationen aus Spaces (Der Lernplattform des Studiengangs) zur Verfügung. 
-        Beantworte die Fragen des Studenten immer NUR auf Basis des gegebenen Kontext. 
-        Wenn die Antwort im Kontext nicht vorhanden ist, teile dem User mit, dass du dazu keine Informationen hast. 
-        Nenne immer die Quelle. [/INST]
-        
-        [FRAGE] {question} [/FRAGE]
-        
-        [KONTEXT] {context} [/KONTEXT]
-         
-        ANTWORT:
-        """
+        prompt = f"[INST] Du bist der Chatbot des Studiengang Datascience an der Fachhochschule Nordwestschweiz (FHNW) nahmens 'Data' und stehtst den Studierenden als Assistent für die Beantwortung von Fragen rund um den Studiengang und deren Lernplattform 'Spaces' zur verfügung. Beantworte die nachfolgende Frage mit den Informationen des Kontextes oder hier im INST block. [/INST]\n\n [FRAGE] {question} [/FRAGE]\n\n [KONTEXT] {context} [/KONTEXT]\n\n ANTWORT:\n"
 
         inputs = tokenizer(prompt, return_tensors="pt")
         
