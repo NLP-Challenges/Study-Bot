@@ -31,14 +31,14 @@ bnb_config = BitsAndBytesConfig(
 )
     
 # Load fine-tuned LLAMA model and tokenizer
-peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path") #this is an old model -> bug in max position embeddings -> use new config
-model_config = LlamaConfig.from_pretrained("meta-llama/Llama-2-13b-hf")
+peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
+model_config = LlamaConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
 
 llama_model = AutoModelForCausalLM.from_pretrained(
     peft_config.base_model_name_or_path, 
     quantization_config=bnb_config, 
     device_map="auto",
-    config=model_config
+    #config=model_config
 )
 llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
 llama_model.eval()
@@ -178,19 +178,17 @@ def llama_chat(message, history, user_name, temperature):
             prompt, 
             truncation=True,
             padding=False,
-            max_length=4096-500,
-            return_tensors="pt"
+            max_length=4096,
+            return_tensors="pt",
         )
 
         outputs = model.generate(
             input_ids=inputs["input_ids"].to(model.device),
-            attention_mask=inputs["attention_mask"].to(model.device),
-            pad_token_id=tokenizer.pad_token_id,
-            temperature=temperature,
             max_new_tokens=500,
+            temperature=temperature,
             do_sample=True,
             
-            # Contrastive search: https://huggingface.co/blog/introducing-csearch
+            #Contrastive search: https://huggingface.co/blog/introducing-csearch
             penalty_alpha=0.6, 
             top_k=6
         )
