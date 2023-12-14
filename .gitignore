@@ -164,3 +164,4 @@ eda/data/
 **/.DS_Store
 
 embedder.pkl
+chroma/

@@ -31,9 +31,6 @@ def search_documents(vector_database_filename, embedder_filename, query, strateg
     with open(embedder_filename, 'rb') as f:
         embedder = load(f)
 
-    # Make a copy of the chroma folder
-    temp = copy_folder(vector_database_filename)
-
     # Load chroma db
     vectorstore = Chroma(persist_directory=vector_database_filename, embedding_function=embedder)
 
@@ -57,12 +54,6 @@ def search_documents(vector_database_filename, embedder_filename, query, strateg
     # Disconnect from chroma
     del vectorstore
     gc.collect()
-
-    # Wait a sec to avoid simultaneous access to files
-    time.sleep(1)
-
-    # Replace original chroma folder
-    replace_original(vector_database_filename, temp)
 
     # Wait a sec to avoid simultaneous access to files
     time.sleep(1)

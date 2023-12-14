@@ -2,7 +2,9 @@ import os
 import time
 import torch
 import gradio as gr
-from transformers import BertTokenizer, BertForSequenceClassification
+from peft import PeftModel, PeftConfig
+from transformers import AutoModelForCausalLM
+from transformers import AutoTokenizer, BertTokenizer, BertForSequenceClassification, BitsAndBytesConfig, LlamaConfig
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import (
@@ -13,14 +15,35 @@ from langchain.prompts.chat import (
 
 from tools import search_documents  # Assuming your refactored script is named 'your_script.py'
 
-# Setup OpenAI API
 load_dotenv()
-chat = ChatOpenAI(temperature=0)
 
-# Load fine-tuned model and tokenizer
-tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification')
-model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification")
+# Load fine-tuned classification model and tokenizer
+tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification', token=os.getenv("HF_ACCESS_TOKEN"))
+model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification", token=os.getenv("HF_ACCESS_TOKEN"), device_map="cpu")
 model.eval()  # Set the model to evaluation mode
+
+# quantization config
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16
+)
+    
+# Load fine-tuned LLAMA model and tokenizer
+peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
+model_config = LlamaConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
+
+llama_model = AutoModelForCausalLM.from_pretrained(
+    peft_config.base_model_name_or_path, 
+    quantization_config=bnb_config, 
+    device_map="auto",
+    #config=model_config
+)
+llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
+llama_model.eval()
+
+llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
 
 # Classification interface
 def classify_text(strategy, user_input, probabilities):
@@ -96,11 +119,25 @@ documentquery_int = gr.Interface(
 )
 
 # Gradio Chat Interface
-def gpt_chat(message, history, user_name):
+def retrieval(message):
+    time.sleep(1)
     docs = search_documents("assets/chroma", "assets/embedder.pkl", message, "similarity")
     context = ""
     for doc in docs:
         context += f"{doc.metadata}: {doc.page_content}\n"
+    return context
+
+def chat(message, history, user_name, model_type, temperature):
+    if model_type == "GPT-3.5":
+        return gpt_chat(message, history, user_name, temperature)
+    elif model_type == "LLAMA-2 7B":
+        return llama_chat(message, history, user_name, temperature)
+
+def gpt_chat(message, history, user_name, temperature):
+    openai_chat = ChatOpenAI(temperature=temperature)
+
+    # Get context from retrieval system
+    context = retrieval(message)
 
     # Define a prompt template or use the incoming message directly
     template = (
@@ -126,15 +163,47 @@ def gpt_chat(message, history, user_name):
     messages = chat_prompt.format_prompt(
         user_name=user_name, context=context, message=message
     ).to_messages()
-    print(messages)
-    response = chat(messages)
-    print(response)
+    response = openai_chat(messages)
 
     return response.content
 
+def llama_chat(message, history, user_name, temperature):    
+    # Get context from retrieval system
+    context = retrieval(message)
+
+    def predict(model, tokenizer, question, context):        
+        prompt = f"[INST] Du bist der Chatbot des Studiengang Datascience an der Fachhochschule Nordwestschweiz (FHNW) namens 'Data' und stehst den Studierenden als Assistent für die Beantwortung von Fragen rund um den Studiengang und deren Lernplattform 'Spaces' zur verfügung. Beantworte die nachfolgende Frage mit den Informationen des Kontextes (in diesem Fall gib deine Quellen an!) oder hier im INST block. Beziehe die wichtigsten Informationen aller Quellen ein. Überprüfe deine Antworten kritisch und beurteile welche Informationen für die Antwort relevant sind. [/INST]\n\n [FRAGE] {question} [/FRAGE]\n\n [KONTEXT] {context} [/KONTEXT]\n\n ANTWORT:\n"
+
+        inputs = tokenizer(
+            prompt, 
+            truncation=True,
+            padding=False,
+            max_length=4096,
+            return_tensors="pt",
+        )
+
+        outputs = model.generate(
+            input_ids=inputs["input_ids"].to(model.device),
+            max_new_tokens=500,
+            temperature=temperature,
+            do_sample=True,
+            
+            #Contrastive search: https://huggingface.co/blog/introducing-csearch
+            penalty_alpha=0.6, 
+            top_k=6
+        )
+
+        return tokenizer.decode(outputs[:, inputs["input_ids"].shape[1]:][0], skip_special_tokens=True)
+    
+    return predict(llama_model, llama_tokenizer, message, context)
+
 chat_int = gr.ChatInterface(
-    gpt_chat, 
-    additional_inputs=[gr.Textbox(label="Name")],
+    chat, 
+    additional_inputs=[
+        gr.Textbox(label="Name"), 
+        gr.Dropdown(label="Model Architecture", choices=["LLAMA-2 7B", "GPT-3.5"], value="LLAMA-2 7B"),
+        gr.Slider(minimum=0, maximum=1, value=0.3)
+    ],    
     examples=[["Was lerne ich im Modul Grundlagen der linearen Algebra?"]]
 ).queue()
 
