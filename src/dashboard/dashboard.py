@@ -144,12 +144,12 @@ def retrieval(message):
         context += f"{doc.metadata}: {doc.page_content}\n"
     return context
 
-def chat(message, history, use_classifier, selected_class, qa_model_architecture, qa_temperature, concern_temperature):
+def chat(message, history, use_classifier, selected_path, qa_model_architecture, qa_temperature, concern_temperature):
     # Classify message
-    if use_classifier:
+    if use_classifier or selected_path is None:
         message_class = classify_text("classification", message, False)
-    else:   
-        message_class = selected_class
+    else:
+        message_class = selected_path
 
     if message_class == "question":
         if qa_model_architecture == "GPT-3.5":
@@ -321,7 +321,7 @@ chat_int = gr.ChatInterface(
     chat, 
     additional_inputs=[
         gr.Checkbox(label="Automatic Path Selection", info="Use BERT-classifier to automatically choose between question, concern and harm paths.", value=True),
-        gr.Dropdown(label="Path", choices=["question", "concern", "harm"], value=None),
+        gr.Dropdown(label="Path", choices=["question", "concern"], value=None, info="Manually choose which part of Data you want to talk to. This is only effective if 'Automatic Path Selection' is off."),
         gr.Dropdown(label="QA LLM: Architecture", choices=["Llama-2-13B", "GPT-3.5"], value="Llama-2-13B"),
         gr.Slider(label="QA LLM: Temperature", minimum=0, maximum=1, value=0.3),
         gr.Slider(label="Concern LLM: Temperature", minimum=0, maximum=1, value=0.4),
