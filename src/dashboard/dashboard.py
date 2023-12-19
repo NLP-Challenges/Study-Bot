@@ -128,9 +128,10 @@ def retrieval(message):
     return context
 
 def chat(message, history, user_name, model_type, temperature):
+    
     if model_type == "GPT-3.5":
         return gpt_chat(message, history, user_name, temperature)
-    elif model_type == "LLAMA-2 7B":
+    elif model_type == "Llama-2-13B":
         return llama_chat(message, history, user_name, temperature)
 
 def gpt_chat(message, history, user_name, temperature):
@@ -201,7 +202,7 @@ chat_int = gr.ChatInterface(
     chat, 
     additional_inputs=[
         gr.Textbox(label="Name"), 
-        gr.Dropdown(label="Model Architecture", choices=["LLAMA-2 7B", "GPT-3.5"], value="LLAMA-2 7B"),
+        gr.Dropdown(label="Model Architecture", choices=["Llama-2-13B", "GPT-3.5"], value="Llama-2-13B"),
         gr.Slider(minimum=0, maximum=1, value=0.3)
     ],    
     examples=[["Was lerne ich im Modul Grundlagen der linearen Algebra?"]]
