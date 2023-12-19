@@ -18,8 +18,8 @@ from tools import search_documents  # Assuming your refactored script is named '
 load_dotenv()
 
 # Load fine-tuned classification model and tokenizer
-tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification', token=os.getenv("HF_ACCESS_TOKEN"))
-model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification", token=os.getenv("HF_ACCESS_TOKEN"), device_map="cpu")
+tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification-Synthethic-Dataset')
+model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification-Synthethic-Dataset", device_map="cpu")
 model.eval()  # Set the model to evaluation mode
 
 # quantization config
@@ -29,7 +29,7 @@ bnb_config = BitsAndBytesConfig(
     bnb_4bit_quant_type="nf4",
     bnb_4bit_compute_dtype=torch.bfloat16
 )
-    
+
 # Load fine-tuned LLAMA model and tokenizer
 peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
 model_config = LlamaConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
@@ -38,17 +38,15 @@ llama_model = AutoModelForCausalLM.from_pretrained(
     peft_config.base_model_name_or_path, 
     quantization_config=bnb_config, 
     device_map="auto",
-    #config=model_config
+    config=model_config
 )
-llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
+llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path")
 llama_model.eval()
 
-llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", token=os.getenv("HF_ACCESS_TOKEN"))
+llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path")
 
 # Classification interface
 def classify_text(strategy, user_input, probabilities):
-    print(user_input)
-
     # Tokenize the user input
     inputs = tokenizer(
         user_input,
@@ -213,4 +211,4 @@ demo = gr.TabbedInterface([classification_int, documentquery_int, chat_int], ["C
 
 # Launch the interface
 if __name__ == "__main__":
-    demo.launch()
+    demo.launch(share=True)
