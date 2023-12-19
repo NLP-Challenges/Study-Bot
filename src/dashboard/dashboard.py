@@ -14,14 +14,14 @@ from langchain.prompts.chat import (
     SystemMessagePromptTemplate,
 )
 
-from tools import search_documents  # Assuming your refactored script is named 'your_script.py'
+from tools import search_documents
 
 load_dotenv()
 
 # Load fine-tuned classification model and tokenizer
 bert_tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification-Synthethic-Dataset')
 bert_model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification-Synthethic-Dataset", device_map="cpu")
-bert_model.eval()  # Set the model to evaluation mode
+bert_model.eval()
 
 # Load fine-tuned LLAMA model and tokenizer
 llama_bnb_config = BitsAndBytesConfig(
@@ -144,9 +144,13 @@ def retrieval(message):
         context += f"{doc.metadata}: {doc.page_content}\n"
     return context
 
-def chat(message, history, qa_model_architecture, qa_temperature, concern_temperature):
+def chat(message, history, use_classifier, selected_class, qa_model_architecture, qa_temperature, concern_temperature):
     # Classify message
-    message_class = classify_text("similarity", message, False)
+    if use_classifier:
+        message_class = classify_text("classification", message, False)
+    else:   
+        message_class = selected_class
+
     if message_class == "question":
         if qa_model_architecture == "GPT-3.5":
             return question_gpt_chat(message, history, qa_temperature)
@@ -316,6 +320,8 @@ def question_llama_chat(message, history, temperature):
 chat_int = gr.ChatInterface(
     chat, 
     additional_inputs=[
+        gr.Checkbox(label="Automatic Path Selection", info="Use BERT-classifier to decide between question, concern and harm paths.", value=True),
+        gr.Dropdown(label="Path", choices=["question", "concern", "harm"], value=None),
         gr.Dropdown(label="QA LLM: Architecture", choices=["Llama-2-13B", "GPT-3.5"], value="Llama-2-13B"),
         gr.Slider(label="QA LLM: Temperature", minimum=0, maximum=1, value=0.3),
         gr.Slider(label="Concern LLM: Temperature", minimum=0, maximum=1, value=0.4),
