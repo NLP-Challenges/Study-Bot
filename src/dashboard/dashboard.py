@@ -145,6 +145,28 @@ def retrieval(message):
     return context
 
 def chat(message, history, use_classifier, selected_path, qa_model_architecture, qa_temperature, concern_temperature):
+    def generate_response_header(message_class):
+        if message_class == "question":
+            return f"**Question Path** ❓\n\n"
+        elif message_class == "concern":
+            return f"**Concern Path** 🤖\n\n"
+    
+    def clean_history_from_response_headers(history):
+        new_history = []
+        for message_duo in history:
+            new_message_duo = []
+            for message in message_duo:
+                if message:
+                    cleaned_message = re.sub(r'\*\*.*\*\* .+\n\n', '', message)
+                    new_message_duo.append(cleaned_message)
+                else:
+                    new_message_duo.append(message)
+            new_history.append(new_message_duo)
+        return new_history
+    
+    history = clean_history_from_response_headers(history)
+    print(history)
+        
     # Classify message
     if use_classifier or selected_path is None:
         message_class = classify_text("classification", message, False)
@@ -152,11 +174,7 @@ def chat(message, history, use_classifier, selected_path, qa_model_architecture,
         message_class = selected_path
 
     # Generate response
-    def generate_response_header(message_class):
-        if message_class == "question":
-            return f"**Question Path ❓**\n\n"
-        elif message_class == "concern":
-            return f"**Concern Path 🤖**\n\n"
+
     response = ""
     if message_class == "question":
         if qa_model_architecture == "GPT-3.5":
@@ -169,7 +187,7 @@ def chat(message, history, use_classifier, selected_path, qa_model_architecture,
         response = "Damit kann ich dir nicht weiterhelfen, das ist nicht nett 😢"
     else:
         response = "Ich verstehe dich nicht 🤔"
-    return f'{generate_response_header(message_class=message_class)}{response}'
+    return f'{generate_response_header(message_class=message_class)}{str(response)}'
 
 def concern_mistral_chat(message, history, temperature, top_k):
     sys_instruction = """
@@ -255,9 +273,9 @@ def concern_mistral_chat(message, history, temperature, top_k):
 
         return mistral_tokenizer.decode(output[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True, encoding="utf-8")
 
-    #check message and history for injection
-    has_prompt_injection(message)
-    has_prompt_injection(history)
+    # check message and history for injection
+    # has_prompt_injection(message)
+    # has_prompt_injection(history)
 
     return generate_answer(message, history)
 
@@ -333,7 +351,7 @@ chat_int = gr.ChatInterface(
         show_label=True,
         show_copy_button=True,
         likeable=True,
-        avatar_images=('assets/avatar_student.png', 'assets/avatar_data.png'),
+        avatar_images=(None, 'assets/avatar_data.png'),
     ),
     additional_inputs=[
         gr.Checkbox(label="Automatic Path Selection", info="Use BERT-classifier to automatically choose between question, concern and harm paths.", value=True),
