@@ -151,17 +151,25 @@ def chat(message, history, use_classifier, selected_path, qa_model_architecture,
     else:
         message_class = selected_path
 
+    # Generate response
+    def generate_response_header(message_class):
+        if message_class == "question":
+            return f"**Question Path ❓**\n\n"
+        elif message_class == "concern":
+            return f"**Concern Path 🤖**\n\n"
+    response = ""
     if message_class == "question":
         if qa_model_architecture == "GPT-3.5":
-            return question_gpt_chat(message, history, qa_temperature)
+            response = question_gpt_chat(message, history, qa_temperature)
         elif qa_model_architecture == "Llama-2-13B":
-            return question_llama_chat(message, history, qa_temperature)
+            response = question_llama_chat(message, history, qa_temperature)
     elif message_class == "concern":
-        return concern_mistral_chat(message, history, concern_temperature, 200)
+        response = concern_mistral_chat(message, history, concern_temperature, 200)
     elif message_class == "harm":
-        return "Damit kann ich dir nicht weiterhelfen, das ist nicht nett 😢"
+        response = "Damit kann ich dir nicht weiterhelfen, das ist nicht nett 😢"
     else:
-        return "Ich verstehe dich nicht 🤔"
+        response = "Ich verstehe dich nicht 🤔"
+    return f'{generate_response_header(message_class=message_class)}{response}'
 
 def concern_mistral_chat(message, history, temperature, top_k):
     sys_instruction = """
@@ -319,18 +327,27 @@ def question_llama_chat(message, history, temperature):
 
 chat_int = gr.ChatInterface(
     chat, 
+    chatbot=gr.Chatbot(
+        label="Data",
+        value=[[None, "Hallo, ich bin Data, der Chatbot des Studiengangs Data Science an der FHNW. Wie kann ich dir helfen?"]],
+        show_label=True,
+        show_copy_button=True,
+        likeable=True,
+        avatar_images=('assets/avatar_student.png', 'assets/avatar_data.png'),
+    ),
     additional_inputs=[
         gr.Checkbox(label="Automatic Path Selection", info="Use BERT-classifier to automatically choose between question, concern and harm paths.", value=True),
         gr.Dropdown(label="Path", choices=["question", "concern"], value=None, info="Manually choose which part of Data you want to talk to. This is only effective if 'Automatic Path Selection' is off."),
         gr.Dropdown(label="QA LLM: Architecture", choices=["Llama-2-13B", "GPT-3.5"], value="Llama-2-13B"),
         gr.Slider(label="QA LLM: Temperature", minimum=0, maximum=1, value=0.3),
-        gr.Slider(label="Concern LLM: Temperature", minimum=0, maximum=1, value=0.4),
+        gr.Slider(label="Concern LLM: Temperature", minimum=0, maximum=1, value=0.4)
     ],
-    examples=[["Was lerne ich im Modul Grundlagen der linearen Algebra?"]]
+    description="Chat with Data, the friendly chatbot of the BSc Data Science at FHNW. Built by Tobias Buess, Alexander Shanmugam and Yvo Keller within cnlp1/HS23.",
+    examples=[["Was lerne ich im Modul Grundlagen der linearen Algebra?"], ["Wer ist Fachexperte im Modul NPR?"], ["Hey, ich hatte heute einen ganz schlechten Tag..."]]
 ).queue()
 
 # Combine all interfaces in a tabbed interface
-demo = gr.TabbedInterface([classification_int, documentquery_int, chat_int], ["Classification", "Retrieval", "Chat with Data"], title="One interface to rule Data 🤖")
+demo = gr.TabbedInterface([chat_int, classification_int, documentquery_int], ["Chat with Data", "Classification", "Retrieval"], title="One interface to rule Data 🤖")
 
 # Launch the interface
 if __name__ == "__main__":
