@@ -87,7 +87,7 @@ def classify_text(strategy, user_input, probabilities):
     _, predicted_idx = torch.max(output.logits, 1)
 
     # Map index to label
-    label_mapping = {0: 'harm', 1: 'question', 2: 'concern'}
+    label_mapping = {0: 'concern', 1: 'harm', 2: 'question'} # NOTE: Make sure to set this correctly. Via model config in future.
     if probabilities:
         # softmax logits
         probs = torch.nn.functional.softmax(output.logits, dim=1)
@@ -320,7 +320,7 @@ def question_llama_chat(message, history, temperature):
 chat_int = gr.ChatInterface(
     chat, 
     additional_inputs=[
-        gr.Checkbox(label="Automatic Path Selection", info="Use BERT-classifier to decide between question, concern and harm paths.", value=True),
+        gr.Checkbox(label="Automatic Path Selection", info="Use BERT-classifier to automatically choose between question, concern and harm paths.", value=True),
         gr.Dropdown(label="Path", choices=["question", "concern", "harm"], value=None),
         gr.Dropdown(label="QA LLM: Architecture", choices=["Llama-2-13B", "GPT-3.5"], value="Llama-2-13B"),
         gr.Slider(label="QA LLM: Temperature", minimum=0, maximum=1, value=0.3),
