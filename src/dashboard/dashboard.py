@@ -102,6 +102,8 @@ classification_int = gr.Interface(
         gr.Textbox(label="Text", placeholder="Ist das eine Frage?", lines=2),
         gr.Checkbox(label="Probabilities", info="Show probabilities for each class.")
     ],
+    flagging_options=['Question', 'Concern', 'Harm'],
+    flagging_dir='flagged/classification',
     outputs=gr.Label(num_top_classes=3)
 )
 
@@ -130,8 +132,10 @@ documentquery_int = gr.Interface(
         gr.Dropdown(label="Vector Database Filename", choices=["assets/chroma"], value="assets/chroma"), 
         gr.Dropdown(label="Embedder Filename", choices=["assets/embedder.pkl"], value="assets/embedder.pkl"),
         gr.Textbox(label="Query", placeholder="Was ist Data Science?", lines=2),
-        gr.Radio(label="Strategy", choices=["similarity", "selfquery"])
+        gr.Radio(label="Strategy", choices=["similarity", "selfquery"], value="similarity")
     ],
+    flagging_options=['Irrelevant', 'Wrong data', 'Other'],
+    flagging_dir='flagged/retrieval',
     outputs=gr.HTML(),
 )
 
@@ -167,7 +171,6 @@ def chat(message, history, use_classifier, selected_path, qa_model_architecture,
         return new_history
     
     history = clean_history_from_response_headers(history)
-    print(history)
         
     # Classify message
     if use_classifier or selected_path is None:
