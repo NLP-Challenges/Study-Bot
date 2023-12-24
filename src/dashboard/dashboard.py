@@ -47,19 +47,18 @@ llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path")
 
 # Load fine-tuned Mistral model and tokenizer
 model_name = "LeoLM/leo-mistral-hessianai-7b-chat"
-device = "cuda:0"
 max_new_tokens = 500
 
 mistral_bnb_config = BitsAndBytesConfig(
-    load_in_8bit=True,
-    #bnb_4bit_use_double_quant=True,
-    #bnb_4bit_quant_type="nf4",
-    #bnb_4bit_compute_dtype=torch.bfloat16
+    load_in_4bit=True,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4",
+    bnb_4bit_compute_dtype=torch.bfloat16
 )
 
 mistral_model = AutoModelForCausalLM.from_pretrained(
     model_name, 
-    device_map=device,
+    device_map="auto",
     quantization_config=mistral_bnb_config
 )
 mistral_tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
