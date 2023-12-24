@@ -17,10 +17,11 @@ from langchain.prompts.chat import (
 from tools import search_documents
 
 load_dotenv()
+hf_token = os.environ["HF_ACCESS_TOKEN"]
 
 # Load fine-tuned classification model and tokenizer
-bert_tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification-Synthethic-Dataset')
-bert_model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification-Synthethic-Dataset", device_map="cpu")
+bert_tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification-Synthethic-Dataset', token=hf_token)
+bert_model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification-Synthethic-Dataset", device_map="cpu", token=hf_token)
 bert_model.eval()
 
 # Load fine-tuned LLAMA model and tokenizer
@@ -31,19 +32,20 @@ llama_bnb_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.bfloat16
 )
 
-peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
-model_config = LlamaConfig.from_pretrained("nlpchallenges/chatbot-qa-path")
+peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token)
+model_config = LlamaConfig.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token)
 
 llama_model = AutoModelForCausalLM.from_pretrained(
     peft_config.base_model_name_or_path, 
     quantization_config=llama_bnb_config, 
     device_map="auto",
-    config=model_config
+    config=model_config,
+    token=hf_token
 )
 llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path")
 llama_model.eval()
 
-llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path")
+llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token)
 
 # Load fine-tuned Mistral model and tokenizer
 model_name = "LeoLM/leo-mistral-hessianai-7b-chat"
@@ -53,15 +55,16 @@ mistral_bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
     bnb_4bit_use_double_quant=True,
     bnb_4bit_quant_type="nf4",
-    bnb_4bit_compute_dtype=torch.bfloat16
+    bnb_4bit_compute_dtype=torch.bfloat16,
 )
 
 mistral_model = AutoModelForCausalLM.from_pretrained(
     model_name, 
     device_map="auto",
-    quantization_config=mistral_bnb_config
+    quantization_config=mistral_bnb_config, 
+    token=hf_token
 )
-mistral_tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+mistral_tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True, token=hf_token)
 
 # Classification interface
 def classify_text(strategy, user_input, probabilities):
