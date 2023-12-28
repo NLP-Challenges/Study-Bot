@@ -330,7 +330,7 @@ def question_llama_chat(message, history, temperature):
     context = retrieval(message)
 
     def predict(model, tokenizer, question, context):        
-        prompt = f"[INST] Dein Name ist Data, du bist der Chatbot des Studiengang Data Science an der Fachhochschule Nordwestschweiz (FHNW). Du stehst den Studierenden als Tutor für die Beantwortung von Fragen rund um den Studiengang und deren Lernplattform 'Spaces' zur Verfügung. Beantworte die nachfolgende Frage mit den Informationen des KONTEXT. Beziehe die wichtigsten Informationen aller Quellen ein, und gebe diese an. Überprüfe deine Antworten kritisch, und beurteile welche Informationen für die Antwort relevant sind. [/INST]\n\n [FRAGE] {question} [/FRAGE]\n\n [KONTEXT] {context} [/KONTEXT]\n\n ANTWORT:\n"
+        prompt = f"[INST] Nachfolgend wird dir eine Frage gestellt. Versuche die Frage aussschliesslich mit Hilfe des Kontextes zu beantworten. Kannst du die Frage nicht beantworten, so teile dies mit! [/INST]\n\n [FRAGE] {question} [/FRAGE]\n\n [KONTEXT] {context} [/KONTEXT]\n\n ANTWORT:\n"
 
         inputs = tokenizer(
             prompt, 
