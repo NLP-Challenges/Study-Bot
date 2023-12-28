@@ -5,7 +5,7 @@ import torch
 import gradio as gr
 from peft import PeftModel, PeftConfig
 from transformers import AutoModelForCausalLM
-from transformers import AutoTokenizer, BertTokenizer, BertForSequenceClassification, BitsAndBytesConfig, LlamaConfig
+from transformers import AutoTokenizer, BertTokenizer, BertForSequenceClassification, BitsAndBytesConfig, AutoConfig
 from dotenv import load_dotenv
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import (
@@ -19,9 +19,12 @@ from tools import search_documents
 load_dotenv()
 hf_token = os.environ["HF_ACCESS_TOKEN"]
 
+commit_hash_classification = "86042c0ac708cdb3bbc4019c8329f2d5dba887cd"
+commit_hash_qa = "0388f92924c47ddc2e0aa987551df79bc610c13d"
+
 # Load fine-tuned classification model and tokenizer
-bert_tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification-Synthethic-Dataset', token=hf_token)
-bert_model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification-Synthethic-Dataset", device_map="cpu", token=hf_token)
+bert_tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification-Synthethic-Dataset', token=hf_token, revision=commit_hash_classification)
+bert_model = BertForSequenceClassification.from_pretrained("nlpchallenges/Text-Classification-Synthethic-Dataset", device_map="cpu", token=hf_token, revision=commit_hash_classification)
 bert_model.eval()
 
 # Load fine-tuned LLAMA model and tokenizer
@@ -32,8 +35,8 @@ llama_bnb_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.bfloat16
 )
 
-peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token)
-model_config = LlamaConfig.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token)
+peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token, revision=commit_hash_qa)
+model_config = AutoConfig.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token, revision=commit_hash_qa)
 
 llama_model = AutoModelForCausalLM.from_pretrained(
     peft_config.base_model_name_or_path, 
@@ -42,10 +45,10 @@ llama_model = AutoModelForCausalLM.from_pretrained(
     config=model_config,
     token=hf_token
 )
-llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path")
+llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path", revision=commit_hash_qa)
 llama_model.eval()
 
-llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token)
+llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token, revision=commit_hash_qa)
 
 # Load fine-tuned Mistral model and tokenizer
 model_name = "LeoLM/leo-mistral-hessianai-7b-chat"
