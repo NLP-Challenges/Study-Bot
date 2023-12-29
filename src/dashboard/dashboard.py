@@ -20,7 +20,7 @@ load_dotenv()
 hf_token = os.environ["HF_ACCESS_TOKEN"]
 
 commit_hash_classification = "86042c0ac708cdb3bbc4019c8329f2d5dba887cd"
-commit_hash_qa = "0388f92924c47ddc2e0aa987551df79bc610c13d"
+commit_hash_qa = "da965afa6ead060901bdbe3e2ab5f5be8954c4a1"
 
 # Load fine-tuned classification model and tokenizer
 bert_tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification-Synthethic-Dataset', token=hf_token, revision=commit_hash_classification)
@@ -37,18 +37,19 @@ llama_bnb_config = BitsAndBytesConfig(
 
 peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token, revision=commit_hash_qa)
 model_config = AutoConfig.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token, revision=commit_hash_qa)
+qa_custom_name = model_config.architectures[0]
 
-llama_model = AutoModelForCausalLM.from_pretrained(
+qa_model = AutoModelForCausalLM.from_pretrained(
     peft_config.base_model_name_or_path, 
     quantization_config=llama_bnb_config, 
     device_map="auto",
     config=model_config,
     token=hf_token
 )
-llama_model = PeftModel.from_pretrained(llama_model, "nlpchallenges/chatbot-qa-path", revision=commit_hash_qa)
-llama_model.eval()
+qa_model = PeftModel.from_pretrained(qa_model, "nlpchallenges/chatbot-qa-path", revision=commit_hash_qa)
+qa_model.eval()
 
-llama_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token, revision=commit_hash_qa)
+qa_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token, revision=commit_hash_qa)
 
 # Load fine-tuned Mistral model and tokenizer
 model_name = "LeoLM/leo-mistral-hessianai-7b-chat"
@@ -61,13 +62,13 @@ mistral_bnb_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.bfloat16,
 )
 
-mistral_model = AutoModelForCausalLM.from_pretrained(
+concern_model = AutoModelForCausalLM.from_pretrained(
     model_name, 
     device_map="auto",
     quantization_config=mistral_bnb_config, 
     token=hf_token
 )
-mistral_tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True, token=hf_token)
+concern_tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True, token=hf_token)
 
 # Classification interface
 def classify_text(strategy, user_input, probabilities):
@@ -188,17 +189,17 @@ def chat(message, history, use_classifier, selected_path, qa_model_architecture,
     if message_class == "question":
         if qa_model_architecture == "GPT-3.5":
             response = question_gpt_chat(message, history, qa_temperature)
-        elif qa_model_architecture == "Llama-2-13B":
-            response = question_llama_chat(message, history, qa_temperature)
+        elif qa_model_architecture == f"{qa_custom_name}":
+            response = question_custom_chat(message, history, qa_temperature)
     elif message_class == "concern":
-        response = concern_mistral_chat(message, history, concern_temperature, 200)
+        response = concern_custom_chat(message, history, concern_temperature, 200)
     elif message_class == "harm":
         response = "Damit kann ich dir nicht weiterhelfen, das ist nicht nett 😢"
     else:
         response = "Ich verstehe dich nicht 🤔"
     return f'{generate_response_header(message_class=message_class)}{str(response)}'
 
-def concern_mistral_chat(message, history, temperature, top_k):
+def concern_custom_chat(message, history, temperature, top_k):
     sys_instruction = """
     Du schlüpfst in die Rolle der nachfolgend beschriebenen Person.
     Du bist in einem Dialog mit einem Gesprächspartner.
@@ -270,12 +271,12 @@ def concern_mistral_chat(message, history, temperature, top_k):
             return prompt  
         
         prompt = generate_promt_mistral(unser_input, history)
-        inputs = mistral_tokenizer(prompt, return_tensors="pt", padding=False).to(mistral_model.device)
+        inputs = concern_tokenizer(prompt, return_tensors="pt", padding=False).to(concern_model.device)
 
         with torch.no_grad():
             # https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277 top-k sampling explained
             # https://huggingface.co/blog/how-to-generate different sampling methods explained especially the suffer of repetitivenes of beamsearch 
-            output = mistral_model.generate(
+            output = concern_model.generate(
                 **inputs,
                 max_new_tokens=max_new_tokens,
                 temperature=temperature,
@@ -283,7 +284,7 @@ def concern_mistral_chat(message, history, temperature, top_k):
                 do_sample=True,
             )
 
-        return mistral_tokenizer.decode(output[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True, encoding="utf-8")
+        return concern_tokenizer.decode(output[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True, encoding="utf-8")
 
     # check message and history for injection
     # has_prompt_injection(message)
@@ -325,7 +326,7 @@ def question_gpt_chat(message, history, temperature):
 
     return response.content
 
-def question_llama_chat(message, history, temperature):    
+def question_custom_chat(message, history, temperature):    
     # Get context from retrieval system
     context = retrieval(message)
 
@@ -353,7 +354,7 @@ def question_llama_chat(message, history, temperature):
 
         return tokenizer.decode(outputs[:, inputs["input_ids"].shape[1]:][0], skip_special_tokens=True)
     
-    return predict(llama_model, llama_tokenizer, message, context)
+    return predict(qa_model, qa_tokenizer, message, context)
 
 chat_int = gr.ChatInterface(
     chat, 
@@ -368,7 +369,7 @@ chat_int = gr.ChatInterface(
     additional_inputs=[
         gr.Checkbox(label="Automatic Path Selection", info="Use BERT-classifier to automatically choose between question, concern and harm paths.", value=True),
         gr.Dropdown(label="Path", choices=["question", "concern"], value=None, info="Manually choose which part of Data you want to talk to. This is only effective if 'Automatic Path Selection' is off."),
-        gr.Dropdown(label="QA LLM: Architecture", choices=["Llama-2-13B", "GPT-3.5"], value="Llama-2-13B"),
+        gr.Dropdown(label="QA LLM: Architecture", choices=[f"{qa_custom_name}", "GPT-3.5"], value=f"{qa_custom_name}"),
         gr.Slider(label="QA LLM: Temperature", minimum=0, maximum=1, value=0.3),
         gr.Slider(label="Concern LLM: Temperature", minimum=0, maximum=1, value=0.4)
     ],
