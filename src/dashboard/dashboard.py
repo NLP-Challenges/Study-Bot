@@ -20,7 +20,7 @@ load_dotenv()
 hf_token = os.environ["HF_ACCESS_TOKEN"]
 
 commit_hash_classification = "86042c0ac708cdb3bbc4019c8329f2d5dba887cd"
-commit_hash_qa = "da965afa6ead060901bdbe3e2ab5f5be8954c4a1"
+commit_hash_qa = "8e9a6caf2909673e9bdbbcb8f98cb224505e56b1"
 
 # Load fine-tuned classification model and tokenizer
 bert_tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification-Synthethic-Dataset', token=hf_token, revision=commit_hash_classification)
@@ -38,6 +38,7 @@ llama_bnb_config = BitsAndBytesConfig(
 peft_config = PeftConfig.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token, revision=commit_hash_qa)
 model_config = AutoConfig.from_pretrained("nlpchallenges/chatbot-qa-path", token=hf_token, revision=commit_hash_qa)
 qa_custom_name = model_config.architectures[0]
+qa_max_tokens = model_config.max_position_embeddings
 
 qa_model = AutoModelForCausalLM.from_pretrained(
     peft_config.base_model_name_or_path, 
@@ -53,7 +54,6 @@ qa_tokenizer = AutoTokenizer.from_pretrained("nlpchallenges/chatbot-qa-path", to
 
 # Load fine-tuned Mistral model and tokenizer
 model_name = "LeoLM/leo-mistral-hessianai-7b-chat"
-max_new_tokens = 500
 
 mistral_bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -271,14 +271,20 @@ def concern_custom_chat(message, history, temperature, top_k):
             return prompt  
         
         prompt = generate_promt_mistral(unser_input, history)
-        inputs = concern_tokenizer(prompt, return_tensors="pt", padding=False).to(concern_model.device)
+        inputs = concern_tokenizer(
+            prompt, 
+            return_tensors="pt", 
+            truncation=True,
+            padding=False,
+            max_length=32768-500
+        ).to(concern_model.device)
 
         with torch.no_grad():
             # https://towardsdatascience.com/how-to-sample-from-language-models-682bceb97277 top-k sampling explained
             # https://huggingface.co/blog/how-to-generate different sampling methods explained especially the suffer of repetitivenes of beamsearch 
             output = concern_model.generate(
                 **inputs,
-                max_new_tokens=max_new_tokens,
+                max_new_tokens=500,
                 temperature=temperature,
                 top_k=top_k,
                 do_sample=True,
@@ -335,21 +341,17 @@ def question_custom_chat(message, history, temperature):
 
         inputs = tokenizer(
             prompt, 
+            return_tensors="pt",
             truncation=True,
             padding=False,
-            max_length=4096,
-            return_tensors="pt",
-        )
+            max_length=qa_max_tokens-500
+        ).to(model.device)
 
         outputs = model.generate(
-            input_ids=inputs["input_ids"].to(model.device),
+            **inputs,
             max_new_tokens=500,
             temperature=temperature,
             do_sample=True,
-            
-            # Contrastive search: https://huggingface.co/blog/introducing-csearch
-            penalty_alpha=0.6, 
-            top_k=6
         )
 
         return tokenizer.decode(outputs[:, inputs["input_ids"].shape[1]:][0], skip_special_tokens=True)
@@ -370,7 +372,7 @@ chat_int = gr.ChatInterface(
         gr.Checkbox(label="Automatic Path Selection", info="Use BERT-classifier to automatically choose between question, concern and harm paths.", value=True),
         gr.Dropdown(label="Path", choices=["question", "concern"], value=None, info="Manually choose which part of Data you want to talk to. This is only effective if 'Automatic Path Selection' is off."),
         gr.Dropdown(label="QA LLM: Architecture", choices=[f"{qa_custom_name}", "GPT-3.5"], value=f"{qa_custom_name}"),
-        gr.Slider(label="QA LLM: Temperature", minimum=0, maximum=1, value=0.3),
+        gr.Slider(label="QA LLM: Temperature", minimum=0, maximum=1, value=0.2),
         gr.Slider(label="Concern LLM: Temperature", minimum=0, maximum=1, value=0.4)
     ],
     description="Chat with Data, the friendly chatbot of the BSc Data Science at FHNW. Built by Tobias Buess, Alexander Shanmugam and Yvo Keller within cnlp1/HS23.",
