@@ -216,6 +216,7 @@ def concern_custom_chat(message, history, temperature, top_k):
     HINTERGRUNDWISSEN:
     - Im Studiengang Data Science gibt es das Navigate! Team, welches den Studierenden bei privaten und auch schulischen Problemen helfen kann. Kontakt: navigate.technik@fhnw.ch
     - Es gibt die Organisation Dargebotene Hand, welche rund um die Uhr erreichtbar ist und selbstmordgefährdeten Personen helfen kann. Kontakt: https://www.143.ch/ | Telefon 143
+    - Das Studium dauert in der Regel 6 - 8 Semester oder 3 - 4 Jahre.
     """
     def has_prompt_injection(conversation):
         conversation = [(conversation, "")] if not isinstance(conversation, list) else conversation # if not history, make history like
