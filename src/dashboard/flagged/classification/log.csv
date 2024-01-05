@@ -1,0 +1,2 @@
+Model,Text,Probabilities,output,flag,username,timestamp
+BERT Classifier,Bist du intelligent?,True,"{""label"":""harm"",""confidences"":[{""label"":""harm"",""confidence"":0.7254718542098999},{""label"":""concern"",""confidence"":0.14045824110507965},{""label"":""question"",""confidence"":0.13406993448734283}]}",Concern,,2023-12-20 10:34:08.123748
