@@ -10,12 +10,9 @@ The repository is structured as follows:
 └── 📁Study-Bot
     └── .env.template [ℹ️ Template for the .env file]
     └── README.md
+    └── requirements.txt
     └── 📁assets [ℹ️ Assets used in README.md and docs]
     └── 📁docs [ℹ️ Contains our documentation markdowns]
-        └── CONCEPT.md
-        └── CONCEPT.pdf
-        └── 📁assets
-    └── requirements.txt
     └── 📁src
         └── .DS_Store
         └── README.md
