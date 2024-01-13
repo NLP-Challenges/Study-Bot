@@ -65,7 +65,7 @@ Wir gestalten einen Avatar für "Data", der im Chat Interface angezeigt wird.
 
 Der nachfolgenden Skizze kann die geplante Architektur entnommen werden. Die einzelnen Komponenten werden im Folgenden kurz erläutert, wobei Änderungen an der Architektur oder der eingesetzten Technologien im Verlauf der Challenge nicht ausgeschlossen sind.
 
-![Architecture Sketch](assets/architecture_sketch.jpeg)
+![Architecture Sketch](../assets/architecture_sketch.jpeg)
 
 ### Chat Interface
 
