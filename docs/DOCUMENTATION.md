@@ -100,11 +100,6 @@ We conducted experiments with three different language models:
 #### Evaluation
 We performed quantitative and qualitative evaluations to ascertain the best-performing model in terms of generating context-informed, abstractive answers.
 
-## Future Work
-
-- When we would move towards deploying "Data" in a production environment, our focus would be on continual retraining and improvement of the classifier. This will be achieved by leveraging new human feedback to refine the model's accuracy and adaptability to real-world interactions.
-- Our next steps involve continuous improvement of the question-answering module based on real-world interactions and user feedback.
-
 ### Step 3: Concern Path
 
 For the concern path, we built a prompt upon ethics theory. Find the comprehensive report including evaluation here: [Concern Path](concern_path.pdf)
@@ -115,9 +110,17 @@ The functionality is built directly into the Chatbot Dashboard, see [dashboard.p
 
 After the individual components were developed, we assembled the chatbot using the Hugging Face Gradio framework. It allowed us to create a simple, user-friendly interface for the chatbot, which can be accessed via web browser. It has a Chat Tab, a Retrieval Tab and a Classification Tab. This way, each component can be tested individually, which is immensely helpful for debugging and improving the chatbot.
 
+The Chat Tab is the main interface for the user. It first uses the classifier to determine the type of the user input. If the input is a question, it is passed to the [Question Answering](#step-2-question-answering) module, which retrieves relevant contex and generates the answer. If the input is a concern, the [Concern Path](#step-3-concern-path) is triggered, which generates an appropriate messasge to continue the conversation. If the input is harm, the chatbot responds with a predefined message that denies the user's request.
+
 The implementation can be found in [dashboard.py](../src/dashboard.py).
 
 For setup instructions, see [README.md](../README.md).
+
+## Future Work
+
+- When we would move towards deploying "Data" in a production environment, our focus would be on continual retraining and improvement of the classifier. This will be achieved by leveraging new human feedback to refine the model's accuracy and adaptability to real-world interactions.
+- Our next steps involve continuous improvement of the question-answering module based on real-world interactions and user feedback.
+- Another important improvement would be building a history into the Question Answering module, so that the chatbot can remember previous questions and answers and use them to generate more context-informed answers.
 
 ## Conclusion
 
