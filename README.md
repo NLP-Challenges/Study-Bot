@@ -2,6 +2,8 @@
 
 This repository hosts the implementation of our Chatbot Data. It is based on a Gradio Dashboard.
 
+The **Documentation** the best entry point to fully understanding the project. You can read it [here](docs/DOCUMENTATION.md).
+
 ## Repository Structure
 
 The repository is structured as follows:

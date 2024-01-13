@@ -1,13 +1,33 @@
-# Building "Data" - A Chatbot for the Data Science Study Programme at FHNW
+# Building Data - A Chatbot for the Data Science Study Programme at FHNW
+
+## Introduction
+
+This documentation will go over how we built Data, the Chatbot for the Data Science Study Programme at FHNW. It will cover the following topics:
+
+- [Concept](#concept)
+- [Methodology](#methodology)
+  - [Step 1: Classification](#step-1-classification)
+  - [Step 2: Question Answering](#step-2-question-answering)
+  - [Step 3: Concern Path](#step-3-concern-path)
+  - [Step 4: Assemblying the Chatbot](#step-4-assemblying-the-chatbot)
+- [Future Work](#future-work)
+- [Conclusion](#conclusion)
+- [References](#references)
+
+We refer to the specific implementations of the individual components for more details, which are liked here. Each repository has its own README, which explains the implementation in detail, and further references relevant notebooks and python scripts if you want to dive deeper into the code.
+
+## Concept
+
+Our project started based on the definition of the Chatbot Concept and the Chatbot Architecture. The concept, outlining planned features and the architecture, can be read [here](CONCEPT.md).
 
 ## Methodology
 
 ### Step 1: Classification
 
-[Implementation](https://github.com/NLP-Challenges/Text-Classification)
+Find the implementation and all details on the Classification here: [Text-Classification](https://github.com/NLP-Challenges/Text-Classification)
 
 #### Objective
-The primary objective was to enable our chatbot, named "Data", to classify user prompts into one of three categories: questions, harm, or concerns. This classification is vital for the chatbot to respond appropriately to user interactions.
+The primary objective was to enable our chatbot, named Data, to classify user prompts into one of three categories: questions, harm, or concerns. This classification is vital for the chatbot to respond appropriately to user interactions. For details on why this is vital to our architecture, see [Concept](#concept).
 
 #### Data Selection and Preparation
 We selected three datasets for creating a comprehensive training dataset for our classifier. These included:
@@ -32,7 +52,7 @@ We also recognized some misclassifications in basic queries, such as "Hallo was 
 
 ### Step 2: Question Answering
 
-[Implementation](https://github.com/NLP-Challenges/llm-qa-path)
+Find the implementation and all details on the Question Answering here: [Implementation](https://github.com/NLP-Challenges/llm-qa-path)
 
 #### Objective
 The aim was to develop a large language model (LLM) capable of providing context-informed, abstractive answers to user queries.
@@ -84,3 +104,25 @@ We performed quantitative and qualitative evaluations to ascertain the best-perf
 
 - When we would move towards deploying "Data" in a production environment, our focus would be on continual retraining and improvement of the classifier. This will be achieved by leveraging new human feedback to refine the model's accuracy and adaptability to real-world interactions.
 - Our next steps involve continuous improvement of the question-answering module based on real-world interactions and user feedback.
+
+### Step 3: Concern Path
+
+For the concern path, we built a prompt upon ethics theory. Find the comprehensive report including evaluation here: [Concern Path](concern_path.pdf)
+
+The functionality is built directly into the Chatbot Dashboard, see [dashboard.py](../src/dashboard.py).
+
+### Step 4: Assemblying the Chatbot
+
+After the individual components were developed, we assembled the chatbot using the Hugging Face Gradio framework. It allowed us to create a simple, user-friendly interface for the chatbot, which can be accessed via web browser. It has a Chat Tab, a Retrieval Tab and a Classification Tab. This way, each component can be tested individually, which is immensely helpful for debugging and improving the chatbot.
+
+The implementation can be found in [dashboard.py](../src/dashboard.py).
+
+For setup instructions, see [README.md](../README.md).
+
+## Conclusion
+
+TODO
+
+## References
+
+TODO
