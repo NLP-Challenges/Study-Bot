@@ -375,4 +375,4 @@ TODO
 
 ## References
 
-TODO
+For the references and resources used in our work, see the publicly available [Zotero Library](https://www.zotero.org/groups/5206608/nlp-challenges/library)https://www.zotero.org/groups/5206608/nlp-challenges/library.
