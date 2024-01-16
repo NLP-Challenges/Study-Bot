@@ -349,7 +349,7 @@ chat_int = gr.ChatInterface(
         gr.Slider(label="Concern LLM: Temperature", minimum=0, maximum=1, value=0.4)
     ],
     description="Chat with Data, the friendly chatbot of the BSc Data Science at FHNW. Built by Tobias Buess, Alexander Shanmugam and Yvo Keller within cnlp1/HS23.",
-    examples=[["Was lerne ich im Modul Grundlagen der linearen Algebra?"], ["Wer ist Fachexperte im Modul NPR?"], ["Hey, ich hatte heute einen ganz schlechten Tag..."]]
+    examples=[["Was lerne ich im Modul Grundlagen der linearen Algebra?"], ["Wer hat 400 Keywords Informationsethik verfasst?"], ["Was steht im Studiengangskonzept?"], ["Hey, ich hatte heute einen ganz schlechten Tag..."]]
 ).queue()
 
 # Combine all interfaces in a tabbed interface
