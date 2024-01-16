@@ -364,7 +364,7 @@ For setup instructions, see [README.md](../README.md).
 - During evaluation of retrieval, we discovered that some document chunks produced are really small and offer no value. The questions produced for retrieval evaluation on these where therefore also pointless, and would have distorted our retrieval evaluation, which led us to remove them in the evaluaiton to make it more representative. We would make sure to remove all irrelevant short chunks from the vectorstore altogether.
 - Currently we apply a really simple retrieval strategy of just using the user's chat input as query. There are many additional techniques that we could experiment with and apply here, like self-querying, query re-writing, or performing re-ranking on the retrieved top-k chunks, that could leed to better retrieval performance.
 - We could try other sampling strategies during model inference like beam-search, top-k or top-p during generation (question answering and concern path).
-- Fine-tuning the QA LLM with data more specific to the domain of the chatbot (more technical/scientific than Germanquad)
+- Fine-tuning the QA LLM with data more specific to the domain of the chatbot (more technical than Germanquad)
 - Another idea is to experiment with different instruction tuning prompts.
 - We would correct the instances in the fine-tuning dataset where `can_be_answered=False` samples that were nevertheless answered were included in the fine-tuning, which possibly degraded model performance because of the inconsistency introduced.
 - Perform more sophisticated hyperparameter fine-tuning on neftune alpha, lora rank, lora alpha, and try to apply lora target adapters not only on query and value, but also on MLP layers.
