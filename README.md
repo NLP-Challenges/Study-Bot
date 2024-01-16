@@ -68,7 +68,7 @@ How it works in the background: Data first utilizes the classifier to determine 
 
 ### Tab 1: Chat
 
-In the chat tab, you can talk to Data 🤖 and ask it questions about the Data Science study programme, concerns you have, or just have a chat with it.
+In the chat tab, you can talk to `Data 🤖` and ask it questions about the Data Science study programme, concerns you have, or just have a chat with it.
 
 ![Dashboard](assets/howto_chat.png)
 
@@ -80,12 +80,12 @@ If `Data 🤖` responds going the wrong path, e.g. classifies your input as harm
 
 ### Tab 2: Classification
 
-The classification tab allows you to classify a prompt into one of the three categories: `question`, `concern`, or `harm`. This is helpful for understanding how Data 🤖 classifies your input, which controls the path it takes. It can also be helpful for debugging and understanding why data might be lead down the wrong path.
+The classification tab allows you to classify a prompt into one of the three categories: `question`, `concern`, or `harm`. This is helpful for understanding how `Data 🤖`` classifies your input, which controls the path it takes. It can also be helpful for debugging and understanding why data might be lead down the wrong path.
 
 ![Dashboard](assets/howto_classify.png)
 
 ### Tab 3: Retrieval
 
-The retrieval tab allows you query Data's 🤖 knowledge base with a question and get the most similar document chunks from the vector store. This is helpful for understanding what Data is basing its answers on. For example, you can copy-paste a question from the chat tab and see what Data was basing its answer on.
+The retrieval tab allows you query `Data's 🤖`` knowledge base with a question and get the most similar document chunks from the vector store. This is helpful for understanding what Data is basing its answers on. For example, you can copy-paste a question from the chat tab and see what Data was basing its answer on.
 
 ![Dashboard](assets/howto_retrieval.png)
