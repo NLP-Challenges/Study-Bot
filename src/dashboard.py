@@ -138,7 +138,7 @@ documentquery_int = gr.Interface(
         gr.Dropdown(label="Vector Database Filename", choices=["assets/chroma"], value="assets/chroma"), 
         gr.Dropdown(label="Embedder Filename", choices=["assets/embedder.pkl"], value="assets/embedder.pkl"),
         gr.Textbox(label="Query", placeholder="Was ist Data Science?", lines=2),
-        gr.Radio(label="Strategy", choices=["similarity", "selfquery"], value="similarity")
+        gr.Radio(label="Strategy", choices=["similarity"], value="similarity")
     ],
     flagging_options=['Irrelevant', 'Wrong data', 'Other'],
     flagging_dir='flagged/retrieval',
