@@ -163,6 +163,13 @@ def log_chat_history(message, history, selected_path):
         "date": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
     }
 
+    #create file if not exists
+    filename = "flagged/chats/chat_log.jsonl"
+    if not os.path.exists(filename):
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, "w"):
+            pass
+
     with open("flagged/chats/chat_log.jsonl", "a") as f:
         f.write(json.dumps(chat_log) + "\n")
 
