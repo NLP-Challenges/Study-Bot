@@ -1,3 +1,4 @@
+import json
 import os
 import re
 import time
@@ -154,7 +155,19 @@ def retrieval(message):
         context += f"{doc.metadata}: {doc.page_content}\n"
     return context
 
+def log_chat_history(message, history, selected_path):
+    chat_log = {
+        "message": message,
+        "history": history,
+        "selected_path": selected_path,
+        "date": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+    }
+
+    with open("flagged/chats/chat_log.jsonl", "a") as f:
+        f.write(json.dumps(chat_log) + "\n")
+
 def chat(message, history, use_classifier, selected_path, qa_model_architecture, qa_temperature, concern_temperature):
+    log_chat_history(message, history, selected_path)
     def generate_response_header(message_class):
         if message_class == "question":
             return f"**Question Path** ❓\n\n"
