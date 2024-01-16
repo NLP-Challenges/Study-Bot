@@ -62,7 +62,7 @@ This will load all required models onto the GPU and start the Gradio dashboard. 
 
 ## Using Data
 
-You can chat with Data via the Gradio Dashboard. In this section, we'll go over how you use it to chat with Data, and to debug and understand Data's behavior (be it for educational purposes or for helping improve it).
+You can chat with Data via the Gradio Dashboard. In this section, we'll go over how you use it to chat with Data, and to debug and understand Data's behavior (be it for educational purposes or for helping improve it). Data's main language is German, so you should use German 🇩🇪 to talk to it for best results.
 
 How it works in the background: Data first utilizes the classifier to determine the type of the user input. If the input is a question, it is passed to the [Question Answering](https://github.com/NLP-Challenges/Study-Bot/blob/main/docs/DOCUMENTATION.md#step-2-question-answering) module, which retrieves relevant contex and generates the answer. If the input is a concern, the [Concern Path](https://github.com/NLP-Challenges/Study-Bot/blob/main/docs/DOCUMENTATION.md#step-3-concern-path) is triggered, which generates an appropriate messasge to continue the conversation. If the input is harm, the chatbot responds with a predefined message that denies response to the user.
 
@@ -86,6 +86,6 @@ The classification tab allows you to classify a prompt into one of the three cat
 
 ### Tab 3: Retrieval
 
-The retrieval tab allows you query `Data's 🤖`` knowledge base with a question and get the most similar document chunks from the vector store. This is helpful for understanding what Data is basing its answers on. For example, you can copy-paste a question from the chat tab and see what Data was basing its answer on.
+The retrieval tab allows you query `Data's 🤖` knowledge base with a question and get the most similar document chunks from the vector store. This is helpful for understanding what Data is basing its answers on. For example, you can copy-paste a question from the chat tab and see what Data was basing its answer on.
 
 ![Dashboard](assets/howto_retrieval.png)
