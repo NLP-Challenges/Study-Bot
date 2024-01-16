@@ -1,5 +1,7 @@
 # Building Data - A Chatbot for the Data Science Study Programme at FHNW
 
+Authors: Tobias Buess, Alexander Shanmugam, Yvo Keller
+
 ## Introduction
 
 This documentation will go over how we built Data, the Chatbot for the Data Science Study Programme at FHNW. It will cover the following topics:
