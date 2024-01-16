@@ -20,7 +20,7 @@ load_dotenv()
 hf_token = os.environ["HF_ACCESS_TOKEN"]
 
 commit_hash_classification = "86042c0ac708cdb3bbc4019c8329f2d5dba887cd"
-commit_hash_qa = "8e9a6caf2909673e9bdbbcb8f98cb224505e56b1"
+commit_hash_qa = "da965afa6ead060901bdbe3e2ab5f5be8954c4a1"
 
 # Load fine-tuned classification model and tokenizer
 bert_tokenizer = BertTokenizer.from_pretrained('nlpchallenges/Text-Classification-Synthethic-Dataset', token=hf_token, revision=commit_hash_classification)
