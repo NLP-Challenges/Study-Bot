@@ -96,7 +96,7 @@ The bot initially distinguishes between 3 types of requests:
 
 - question
 - concern
-- not a question or concern
+- not a question or concern (harm)
 
 Possible approach:
 
