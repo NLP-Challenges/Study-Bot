@@ -155,8 +155,9 @@ def retrieval(message):
         context += f"{doc.metadata}: {doc.page_content}\n"
     return context
 
-def log_chat_history(message, history, selected_path):
+def log_chat_history(response, message, history, selected_path):
     chat_log = {
+        "response": response,
         "message": message,
         "history": history,
         "selected_path": selected_path,
@@ -174,7 +175,6 @@ def log_chat_history(message, history, selected_path):
         f.write(json.dumps(chat_log) + "\n")
 
 def chat(message, history, use_classifier, selected_path, qa_model_architecture, qa_temperature, concern_temperature):
-    log_chat_history(message, history, selected_path)
     def generate_response_header(message_class):
         if message_class == "question":
             return f"**Question Path** ❓\n\n"
@@ -208,7 +208,7 @@ def chat(message, history, use_classifier, selected_path, qa_model_architecture,
     response = ""
     if message_class == "question":
         if qa_model_architecture == "GPT-3.5":
-            response = question_gpt_chat(message, history, qa_temperature)
+            response = "" # question_gpt_chat(message, history, qa_temperature)
         elif qa_model_architecture == f"{qa_custom_name}":
             response = question_custom_chat(message, history, qa_temperature)
     elif message_class == "concern":
@@ -217,6 +217,7 @@ def chat(message, history, use_classifier, selected_path, qa_model_architecture,
         response = "Damit kann ich dir nicht weiterhelfen, das ist nicht nett 😢"
     else:
         response = "Ich verstehe dich nicht 🤔"
+    log_chat_history(response, message, history, selected_path)
     return f'{generate_response_header(message_class=message_class)}{str(response)}'
 
 def concern_custom_chat(message, history, temperature, top_k):
@@ -253,7 +254,7 @@ def concern_custom_chat(message, history, temperature, top_k):
                 raise gr.Error("Looks like Data tried to jailbrake itself... The conversation has to be deleted due to security reasons!")
 
     def generate_answer(unser_input:str, history:list=None):
-        def generate_promt_mistral(user_input:str, history:list=[]):
+        def generate_prompt_mistral(user_input:str, history:list=[]):
             prompt = f"<|im_start|>system\n{sys_instruction}<|im_end|>\n"
 
             if len(history) > 0:
@@ -263,7 +264,7 @@ def concern_custom_chat(message, history, temperature, top_k):
 
             return prompt  
         
-        prompt = generate_promt_mistral(unser_input, history)
+        prompt = generate_prompt_mistral(unser_input, history)
         inputs = concern_tokenizer(
             prompt, 
             return_tensors="pt", 
@@ -364,7 +365,7 @@ chat_int = gr.ChatInterface(
     additional_inputs=[
         gr.Checkbox(label="Automatic Path Selection", info="Use BERT-classifier to automatically choose between question, concern and harm paths.", value=True),
         gr.Dropdown(label="Path", choices=["question", "concern"], value=None, info="Manually choose which part of Data you want to talk to. This is only effective if 'Automatic Path Selection' is off."),
-        gr.Dropdown(label="QA LLM: Architecture", choices=[f"{qa_custom_name}", "GPT-3.5"], value=f"{qa_custom_name}"),
+        gr.Dropdown(label="QA LLM: Architecture", choices=[f"{qa_custom_name}"], value=f"{qa_custom_name}"),
         gr.Slider(label="QA LLM: Temperature", minimum=0, maximum=1, value=0.2),
         gr.Slider(label="Concern LLM: Temperature", minimum=0, maximum=1, value=0.4)
     ],
